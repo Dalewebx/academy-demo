@@ -506,23 +506,79 @@ function updateStepper(activeIdx){
   document.getElementById('stepperInner').innerHTML=html;
 }
 
-// ── NAVIGATION ────────────────────────────────────────────────────────
-function showScreen(id){
+// ── NAVIGATION — hash-based routing ──────────────────────────────────
+// URLs: #dash, #course, #module/1, #complete
+// Back button works, refresh stays on same screen, links are shareable
+
+function showScreen(id, pushState){
   document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
   document.getElementById(id).classList.add('active');
   window.scrollTo(0,0);
 }
+
+function navigate(hash, pushState){
+  if(pushState !== false) {
+    history.pushState({hash:hash}, '', '#'+hash);
+  }
+  routeHash(hash);
+}
+
+function routeHash(hash){
+  if(!hash||hash==='login'){
+    showScreen('screen-login');
+    return;
+  }
+  // Must be logged in for any other route
+  if(!isLoggedIn){
+    showScreen('screen-login');
+    return;
+  }
+  if(hash==='dash'){
+    updateStepper(1);
+    showScreen('screen-dash');
+  } else if(hash==='course'){
+    renderCourse();
+    updateStepper(1+Math.max(completed.length,0));
+    showScreen('screen-course');
+  } else if(hash.indexOf('module/')==='module/'.indexOf(hash.indexOf('module/'))){
+    // module/0, module/1, module/2
+    var parts=hash.split('/');
+    if(parts[0]==='module'&&parts[1]!==undefined){
+      var idx=parseInt(parts[1]);
+      if(!isNaN(idx)&&idx>=0&&idx<MODULES.length){
+        var locked=idx>0&&completed.indexOf(idx-1)===-1;
+        if(locked){navigate('course');return;}
+        openModDirect(idx);
+      }
+    }
+  } else if(hash==='complete'){
+    updateStepper(5);
+    renderCourse();
+    showScreen('screen-complete');
+  } else {
+    navigate('dash');
+  }
+}
+
+// Handle browser back/forward
+window.addEventListener('popstate', function(e){
+  var hash=(e.state&&e.state.hash)||window.location.hash.replace('#','');
+  routeHash(hash||'dash');
+});
+
 function goDash(){
-  updateStepper(1);
-  showScreen('screen-dash');
+  navigate('dash');
 }
 function goCourse(){
-  renderCourse();
-  updateStepper(1+Math.max(completed.length,0));
-  showScreen('screen-course');
+  navigate('course');
+}
+function showComplete(){
+  navigate('complete');
 }
 
 // ── LOGIN ────────────────────────────────────────────────────────────
+var isLoggedIn=false;
+
 function doLogin(){
   var u=document.getElementById('loginUser').value.trim().toLowerCase();
   var p=document.getElementById('loginPass').value.trim().toLowerCase();
@@ -530,18 +586,19 @@ function doLogin(){
   if(!u||!p){showErr('Please enter both username and password.');return;}
   if(u!=='demo'||p!=='demo'){showErr('Incorrect username or password. Please try again.');return;}
   err.style.display='none';
+  isLoggedIn=true;
   document.getElementById('topbar').style.display='flex';
   document.getElementById('stepper').style.display='block';
   document.getElementById('topbarName').textContent='Demo Student';
   document.getElementById('dashName').textContent='Welcome back, Demo Student';
-  updateStepper(1);
-  showScreen('screen-dash');
+  navigate('dash');
 }
 function showErr(msg){
   var err=document.getElementById('loginErr');
   err.textContent=msg;err.style.display='block';
 }
 function logout(){
+  isLoggedIn=false;
   completed=[];currentMod=0;answers={};submitted=false;
   timerDone=false;scrollDone=false;
   if(timerInterval) clearInterval(timerInterval);
@@ -550,7 +607,7 @@ function logout(){
   document.getElementById('loginUser').value='';
   document.getElementById('loginPass').value='';
   document.getElementById('loginErr').style.display='none';
-  showScreen('screen-login');
+  navigate('login');
 }
 
 // ── COURSE SCREEN ─────────────────────────────────────────────────────
@@ -581,10 +638,13 @@ function renderCourse(){
 // ── MODULE SCREEN ─────────────────────────────────────────────────────
 var READ_TIME=90; // seconds
 function openMod(i){
+  navigate('module/'+i);
+}
+
+function openModDirect(i){
   currentMod=i;answers={};submitted=false;timerDone=false;scrollDone=false;
   if(timerInterval) clearInterval(timerInterval);
   var m=MODULES[i];
-  // Pick 3 random questions from pool of 6
   var pool=m.pool.slice();
   shownQuestions=[];
   while(shownQuestions.length<3&&pool.length){
@@ -596,12 +656,9 @@ function openMod(i){
   document.getElementById('modContent').innerHTML=m.content;
   document.getElementById('quizCard').style.display='none';
   document.getElementById('modActions').innerHTML='';
-  // Reset quiz result
   document.getElementById('quizResult').innerHTML='';
   document.getElementById('quizResult').classList.remove('show');
-  // Start reading timer
   startReadTimer();
-  // Scroll listener
   setupScrollCheck();
   updateStepper(2+i);
   showScreen('screen-module');
@@ -756,10 +813,15 @@ function retryMod(){
 }
 
 function showComplete(){
-  updateStepper(5);
-  renderCourse();
-  showScreen('screen-complete');
+  navigate('complete');
 }
+
+// ── INITIAL LOAD — read hash on page open ─────────────────────────
+(function(){
+  var hash=window.location.hash.replace('#','');
+  // On fresh load always start at login — hash routing only works after login
+  showScreen('screen-login');
+})();
 </script>
 </body>
 </html>
