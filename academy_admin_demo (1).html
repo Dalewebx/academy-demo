@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Dale Music Academy — Admin v2</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --blue:#1A2E6C;--blue-mid:#2B47A8;--blue-light:#EEF2FF;--blue-pale:#F0F4FF;
+  --amber:#F59E0B;--amber-light:#FEF3C7;--amber-dark:#D97706;
+  --text:#0F172A;--muted:#64748B;--dim:#94A3B8;--border:#E2E8F0;
+  --surface:#F8FAFC;--white:#FFFFFF;--ok:#16A34A;--ok-light:#DCFCE7;
+  --danger:#DC2626;--danger-light:#FEE2E2;--warn:#92400E;--warn-light:#FEF3C7;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--surface);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;}
+.screen{display:none;animation:fadeUp 0.25s ease both;}
+.screen.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* LOGIN */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,var(--blue) 0%,var(--blue-mid) 100%);}
+.login-card{background:var(--white);border-radius:20px;padding:44px 40px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.25);}
+.login-badge{display:inline-flex;align-items:center;gap:6px;background:var(--blue-pale);border:1px solid var(--border);border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--blue);margin-bottom:20px;}
+.login-title{font-family:'DM Serif Display',serif;font-size:28px;color:var(--text);margin-bottom:4px;}
+.login-sub{font-size:13px;color:var(--muted);margin-bottom:24px;}
+.field-label{font-size:11px;font-weight:700;letter-spacing:0.5px;color:var(--text);display:block;margin-bottom:5px;text-transform:uppercase;}
+.field-input{width:100%;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;transition:border-color 0.2s;background:var(--white);margin-bottom:14px;}
+.field-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,46,108,0.08);}
+.login-err{font-size:12px;color:var(--danger);background:var(--danger-light);border-radius:8px;padding:9px 13px;margin-bottom:12px;display:none;}
+
+/* LAYOUT */
+.app-wrap{display:flex;min-height:100vh;}
+.sidebar{width:248px;background:var(--blue);flex-shrink:0;position:fixed;top:0;left:0;bottom:0;z-index:50;display:flex;flex-direction:column;overflow-y:auto;}
+.sidebar-brand{padding:20px 18px 16px;border-bottom:1px solid rgba(255,255,255,0.1);flex-shrink:0;}
+.brand-icon{width:38px;height:38px;background:rgba(255,255,255,0.15);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:8px;}
+.brand-name{font-family:'DM Serif Display',serif;font-size:15px;color:white;line-height:1.2;}
+.brand-sub{font-size:9px;color:rgba(255,255,255,0.45);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px;}
+.sidebar-nav{flex:1;padding:12px 0;}
+.nav-label{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);padding:14px 18px 5px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 18px;font-size:13px;color:rgba(255,255,255,0.65);cursor:pointer;transition:all 0.15s;border-left:3px solid transparent;user-select:none;}
+.nav-item:hover{background:rgba(255,255,255,0.07);color:white;}
+.nav-item.active{background:rgba(255,255,255,0.11);color:white;border-left-color:var(--amber);}
+.nav-icon{font-size:15px;flex-shrink:0;width:20px;text-align:center;}
+.nav-badge{margin-left:auto;background:var(--danger);color:white;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;}
+.sidebar-footer{padding:14px 18px;border-top:1px solid rgba(255,255,255,0.1);flex-shrink:0;}
+.s-user{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.s-avatar{width:34px;height:34px;border-radius:50%;background:var(--amber);display:flex;align-items:center;justify-content:center;font-weight:700;color:white;font-size:14px;flex-shrink:0;}
+.s-name{font-size:13px;color:white;font-weight:500;}
+.s-role{font-size:10px;color:rgba(255,255,255,0.45);}
+.btn-logout-side{width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:7px 12px;font-size:12px;color:rgba(255,255,255,0.55);cursor:pointer;font-family:'DM Sans',sans-serif;text-align:left;transition:all 0.15s;}
+.btn-logout-side:hover{background:rgba(220,38,38,0.2);color:#FCA5A5;}
+.main{margin-left:248px;flex:1;min-width:0;}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 24px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40;gap:12px;}
+.topbar-title{font-family:'DM Serif Display',serif;font-size:19px;color:var(--text);white-space:nowrap;}
+.content{padding:24px;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer;transition:all 0.15s;font-size:13px;text-decoration:none;}
+.btn-primary{background:var(--blue);color:white;padding:9px 18px;}
+.btn-primary:hover{background:var(--blue-mid);}
+.btn-amber{background:var(--amber);color:white;padding:9px 18px;}
+.btn-amber:hover{background:var(--amber-dark);}
+.btn-outline{background:white;border:1.5px solid var(--border);color:var(--text);padding:7px 14px;}
+.btn-outline:hover{border-color:var(--blue);color:var(--blue);}
+.btn-danger{background:var(--danger-light);border:1px solid rgba(220,38,38,0.2);color:var(--danger);padding:5px 11px;font-size:11px;}
+.btn-danger:hover{background:var(--danger);color:white;}
+.btn-success{background:var(--ok-light);border:1px solid rgba(22,163,74,0.2);color:var(--ok);padding:5px 11px;font-size:11px;}
+.btn-sm{padding:6px 13px;font-size:12px;}
+.btn-xs{padding:4px 10px;font-size:11px;}
+
+/* CARDS */
+.card{background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px;}
+.card-hdr{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.card-title{font-family:'DM Serif Display',serif;font-size:16px;color:var(--text);}
+.card-body{padding:18px;}
+
+/* STAT GRID */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:20px;}
+.stat{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px;position:relative;overflow:hidden;}
+.stat::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.stat.s-blue::after{background:var(--blue);}
+.stat.s-amber::after{background:var(--amber);}
+.stat.s-green::after{background:var(--ok);}
+.stat.s-red::after{background:var(--danger);}
+.stat.s-purple::after{background:#7C3AED;}
+.stat-num{font-family:'DM Serif Display',serif;font-size:34px;color:var(--text);line-height:1;}
+.stat-label{font-size:10px;color:var(--muted);margin-top:4px;letter-spacing:0.5px;text-transform:uppercase;font-weight:600;}
+.stat-sub{font-size:11px;color:var(--dim);margin-top:2px;}
+
+/* COURSE ACCORDION */
+.course-block{background:var(--white);border:1.5px solid var(--border);border-radius:14px;margin-bottom:12px;overflow:hidden;transition:border-color 0.15s;}
+.course-block:hover{border-color:var(--blue);}
+.course-block-hdr{display:flex;align-items:center;gap:12px;padding:16px 18px;cursor:pointer;user-select:none;}
+.course-block-hdr:hover{background:var(--blue-pale);}
+.course-chevron{font-size:12px;color:var(--dim);transition:transform 0.2s;flex-shrink:0;}
+.course-block.open .course-chevron{transform:rotate(90deg);}
+.course-color{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.course-block-title{font-family:'DM Serif Display',serif;font-size:16px;color:var(--text);flex:1;}
+.course-block-meta{display:flex;gap:10px;align-items:center;flex-shrink:0;flex-wrap:wrap;}
+.course-body{display:none;border-top:1px solid var(--border);padding:16px 18px;background:var(--surface);}
+.course-block.open .course-body{display:block;}
+.course-stats-row{display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+.course-stat-chip{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:8px 14px;text-align:center;}
+.course-stat-num{font-family:'DM Serif Display',serif;font-size:22px;color:var(--blue);}
+.course-stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;}
+
+/* MODULE ROW */
+.module-row{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--white);border:1px solid var(--border);border-radius:10px;margin-bottom:6px;}
+.module-row:hover{border-color:var(--blue-light);}
+.mod-num{width:28px;height:28px;border-radius:7px;background:var(--blue-light);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--blue);flex-shrink:0;}
+.mod-info{flex:1;min-width:0;}
+.mod-name{font-size:13px;font-weight:500;color:var(--text);}
+.mod-meta{font-size:11px;color:var(--dim);margin-top:1px;}
+.mod-actions{display:flex;gap:5px;flex-shrink:0;}
+.prog-mini{width:80px;flex-shrink:0;}
+.prog-bar-bg{height:5px;background:var(--border);border-radius:5px;overflow:hidden;}
+.prog-bar-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--amber));border-radius:5px;transition:width 0.4s;}
+.prog-label{font-size:10px;color:var(--muted);margin-top:2px;text-align:right;}
+
+/* PILLS */
+.pill{display:inline-flex;align-items:center;gap:3px;border-radius:20px;padding:3px 9px;font-size:11px;font-weight:600;white-space:nowrap;}
+.pill-blue{background:var(--blue-light);color:var(--blue);}
+.pill-green{background:var(--ok-light);color:var(--ok);}
+.pill-amber{background:var(--amber-light);color:var(--amber-dark);}
+.pill-red{background:var(--danger-light);color:var(--danger);}
+.pill-gray{background:var(--surface);border:1px solid var(--border);color:var(--muted);}
+.pill-purple{background:#EDE9FE;color:#6D28D9;}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;}
+.tbl th{text-align:left;padding:9px 14px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);background:var(--surface);border-bottom:1px solid var(--border);}
+.tbl td{padding:11px 14px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:var(--blue-pale);}
+
+/* FORMS */
+.form-group{margin-bottom:14px;}
+.form-label{font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--text);display:block;margin-bottom:5px;}
+.form-input{width:100%;border:1.5px solid var(--border);border-radius:9px;padding:10px 13px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;transition:border-color 0.2s;}
+.form-input:focus{border-color:var(--blue);}
+.form-textarea{resize:vertical;min-height:100px;line-height:1.65;}
+.form-hint{font-size:11px;color:var(--muted);margin-top:4px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.msg-ok{background:var(--ok-light);border:1px solid rgba(22,163,74,0.2);border-radius:8px;padding:9px 13px;font-size:13px;color:var(--ok);display:none;}
+.msg-err{background:var(--danger-light);border:1px solid rgba(220,38,38,0.2);border-radius:8px;padding:9px 13px;font-size:13px;color:var(--danger);display:none;}
+
+/* DEADLINE BANNER */
+.deadline-banner{background:linear-gradient(135deg,var(--blue) 0%,var(--blue-mid) 100%);border-radius:14px;padding:18px 22px;margin-bottom:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.deadline-banner-icon{font-size:28px;flex-shrink:0;}
+.deadline-banner-body{flex:1;}
+.deadline-banner-title{font-family:'DM Serif Display',serif;font-size:17px;color:white;margin-bottom:3px;}
+.deadline-banner-sub{font-size:12px;color:rgba(255,255,255,0.65);}
+.deadline-countdown{background:rgba(255,255,255,0.12);border-radius:10px;padding:10px 18px;text-align:center;flex-shrink:0;}
+.deadline-days{font-family:'DM Serif Display',serif;font-size:32px;color:white;line-height:1;}
+.deadline-days-label{font-size:10px;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:1px;}
+
+/* AT-RISK */
+.at-risk-row{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--danger-light);border:1px solid rgba(220,38,38,0.15);border-radius:10px;margin-bottom:6px;}
+.at-risk-name{flex:1;font-size:13px;font-weight:500;color:var(--danger);}
+.at-risk-meta{font-size:11px;color:var(--danger);opacity:0.75;}
+
+/* ANNOUNCEMENT */
+.announcement-card{background:linear-gradient(135deg,#FEF3C7,#FFFBEB);border:1px solid #FDE68A;border-radius:12px;padding:16px 18px;margin-bottom:14px;}
+.announcement-meta{font-size:11px;color:var(--amber-dark);margin-bottom:4px;}
+.announcement-text{font-size:13px;color:var(--text);}
+
+/* QUESTION BANK */
+.q-item{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:13px 16px;margin-bottom:7px;}
+.q-text{font-size:13px;font-weight:500;color:var(--text);margin-bottom:8px;}
+.q-opts{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+.q-opt{font-size:11px;color:var(--muted);padding:5px 9px;border:1px solid var(--border);border-radius:7px;}
+.q-opt.correct{border-color:var(--ok);background:var(--ok-light);color:var(--ok);font-weight:600;}
+
+/* ANALYTICS */
+.analytics-bar{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.analytics-label{font-size:12px;color:var(--text);width:220px;flex-shrink:0;line-height:1.3;}
+.analytics-track{flex:1;height:18px;background:var(--border);border-radius:4px;overflow:hidden;}
+.analytics-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:6px;}
+.analytics-pct{font-size:10px;color:white;font-weight:700;}
+.analytics-count{font-size:11px;color:var(--muted);width:50px;text-align:right;flex-shrink:0;}
+
+/* TABS */
+.tab-bar{display:flex;border-bottom:1px solid var(--border);margin-bottom:18px;overflow-x:auto;gap:0;}
+.tab{padding:10px 16px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2.5px solid transparent;white-space:nowrap;transition:all 0.15s;}
+.tab:hover{color:var(--blue);}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:600;}
+
+/* CONTENT MANAGER */
+.cm-layout{display:grid;grid-template-columns:260px 1fr;gap:16px;align-items:start;}
+.cm-sidebar{background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden;position:sticky;top:74px;}
+.cm-sidebar-hdr{padding:14px 16px;border-bottom:1px solid var(--border);font-family:'DM Serif Display',serif;font-size:15px;color:var(--text);}
+.cm-course-group{border-bottom:1px solid var(--border);}
+.cm-course-label{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:background 0.15s;user-select:none;}
+.cm-course-label:hover{background:var(--surface);}
+.cm-course-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.cm-module-list{padding:4px 0 8px 0;}
+.cm-module-item{display:flex;align-items:center;gap:8px;padding:7px 14px 7px 30px;font-size:12px;color:var(--muted);cursor:pointer;transition:all 0.15s;}
+.cm-module-item:hover{background:var(--blue-pale);color:var(--blue);}
+.cm-module-item.active{background:var(--blue-light);color:var(--blue);font-weight:600;}
+.cm-module-status{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.cm-add-module{padding:6px 14px 10px 30px;}
+/* RICH TEXT EDITOR */
+.rte-toolbar{display:flex;gap:4px;padding:8px 10px;background:var(--surface);border:1.5px solid var(--border);border-bottom:none;border-radius:9px 9px 0 0;flex-wrap:wrap;}
+.rte-btn{background:var(--white);border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;color:var(--text);transition:all 0.15s;display:flex;align-items:center;gap:4px;}
+.rte-btn:hover{border-color:var(--blue);color:var(--blue);}
+.rte-btn.active{background:var(--blue);color:white;border-color:var(--blue);}
+.rte-sep{width:1px;height:24px;background:var(--border);margin:0 4px;align-self:center;}
+.rte-area{width:100%;min-height:220px;border:1.5px solid var(--border);border-top:none;border-radius:0 0 9px 9px;padding:14px 16px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;line-height:1.8;resize:vertical;}
+.rte-area:focus{border-color:var(--blue);}
+.rte-area h2{font-family:'DM Serif Display',serif;font-size:20px;color:var(--blue);margin:16px 0 6px;}
+.rte-area p{margin-bottom:10px;}
+/* QUESTION BUILDER */
+.q-builder-block{background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;position:relative;}
+.q-builder-block:hover{border-color:var(--blue-light);}
+.q-builder-num{position:absolute;top:14px;left:16px;width:24px;height:24px;background:var(--blue);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;}
+.q-builder-body{padding-left:36px;}
+.q-builder-text{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:10px 13px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;margin-bottom:10px;transition:border-color 0.2s;}
+.q-builder-text:focus{border-color:var(--blue);}
+.q-opts-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.q-opt-wrap{position:relative;}
+.q-opt-label{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:11px;font-weight:700;color:var(--muted);pointer-events:none;}
+.q-opt-input{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:9px 10px 9px 28px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;transition:all 0.2s;}
+.q-opt-input:focus{border-color:var(--blue);}
+.q-opt-input.is-correct{border-color:var(--ok);background:var(--ok-light);}
+.q-correct-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.q-correct-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);}
+.q-correct-select{border:1.5px solid var(--border);border-radius:8px;padding:7px 28px 7px 10px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;cursor:pointer;transition:border-color 0.2s;}
+.q-correct-select:focus{border-color:var(--ok);}
+.q-remove-btn{background:none;border:1px solid rgba(220,38,38,0.2);border-radius:7px;padding:6px 10px;font-size:11px;color:var(--danger);cursor:pointer;font-family:'DM Sans',sans-serif;margin-left:auto;transition:all 0.15s;}
+.q-remove-btn:hover{background:var(--danger);color:white;}
+.drop-zone{border:2px dashed var(--border);border-radius:12px;padding:32px;text-align:center;transition:all 0.2s;cursor:pointer;background:var(--surface);}
+.drop-zone:hover,.drop-zone.dragover{border-color:var(--blue);background:var(--blue-pale);}
+.drop-zone-icon{font-size:32px;margin-bottom:10px;}
+.drop-zone-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;}
+.drop-zone-sub{font-size:12px;color:var(--muted);}
+.content-preview{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px 20px;font-size:14px;color:var(--text);line-height:1.8;max-height:200px;overflow-y:auto;}
+.content-preview h2{font-family:'DM Serif Display',serif;font-size:18px;color:var(--blue);margin:12px 0 6px;}
+.mode-tabs{display:flex;gap:0;border:1.5px solid var(--border);border-radius:9px;overflow:hidden;margin-bottom:14px;width:fit-content;}
+.mode-tab{padding:8px 18px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;transition:all 0.15s;background:var(--white);}
+.mode-tab.active{background:var(--blue);color:white;}
+.pub-toggle{display:flex;align-items:center;gap:10px;}
+.pub-switch{width:42px;height:24px;background:var(--border);border-radius:12px;position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;}
+.pub-switch.on{background:var(--ok);}
+.pub-switch-dot{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:white;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.2);}
+.pub-switch.on .pub-switch-dot{left:21px;}
+
+@media(max-width:860px){.cm-layout{grid-template-columns:1fr;}.cm-sidebar{position:static;}}
+@media(max-width:720px){
+  .sidebar{display:none;}.main{margin-left:0;}
+  .form-row{grid-template-columns:1fr;}
+  .stat-grid{grid-template-columns:1fr 1fr;}
+  .q-opts{grid-template-columns:1fr;}
+  .q-opts-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="screen active" id="screen-login">
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-badge">⚙ Admin Portal · v2</div>
+      <div class="login-title">Dale Music Academy</div>
+      <div class="login-sub">Sign in to manage courses, students, and progress.</div>
+      <label class="field-label">Username</label>
+      <input class="field-input" id="loginUser" type="text" placeholder="Username: dale" autocomplete="username"/>
+      <label class="field-label">Password</label>
+      <input class="field-input" id="loginPass" type="password" placeholder="Password: dale" onkeydown="if(event.key==='Enter')doLogin()"/>
+      <div class="login-err" id="loginErr"></div>
+      <button class="btn btn-primary" style="width:100%;padding:13px;font-size:14px;" onclick="doLogin()">Sign in to Admin →</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="screen" id="screen-app">
+  <div class="app-wrap">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">♪</div>
+        <div class="brand-name">Dale Music Academy</div>
+        <div class="brand-sub">Admin Portal</div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-label">Overview</div>
+        <div class="nav-item active" onclick="goTab('dashboard')" id="nav-dashboard"><span class="nav-icon">📊</span>Dashboard</div>
+        <div class="nav-label">Academic</div>
+        <div class="nav-item" onclick="goTab('content')" id="nav-content"><span class="nav-icon">✏️</span>Content Manager</div>
+        <div class="nav-item" onclick="goTab('courses')" id="nav-courses"><span class="nav-icon">📚</span>Courses & Modules</div>
+        <div class="nav-item" onclick="goTab('questions')" id="nav-questions"><span class="nav-icon">❓</span>Question Bank</div>
+        <div class="nav-label">Students</div>
+        <div class="nav-item" onclick="goTab('students')" id="nav-students"><span class="nav-icon">👥</span>All Students</div>
+        <div class="nav-item" onclick="goTab('progress')" id="nav-progress"><span class="nav-icon">📈</span>Progress Records</div>
+        <div class="nav-item" onclick="goTab('atrisk')" id="nav-atrisk"><span class="nav-icon">⚠️</span>At-Risk Students<span class="nav-badge" id="atrisk-badge">4</span></div>
+        <div class="nav-label">Tools</div>
+        <div class="nav-item" onclick="goTab('deadline')" id="nav-deadline"><span class="nav-icon">📅</span>Cohort Deadline</div>
+        <div class="nav-item" onclick="goTab('analytics')" id="nav-analytics"><span class="nav-icon">🔬</span>Assessment Analytics</div>
+        <div class="nav-item" onclick="goTab('announce')" id="nav-announce"><span class="nav-icon">📢</span>Announcements</div>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="s-user">
+          <div class="s-avatar">D</div>
+          <div><div class="s-name">Dale</div><div class="s-role">Administrator</div></div>
+        </div>
+        <button class="btn-logout-side" onclick="logout()">↩ Sign out</button>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+      <div class="topbar">
+        <div class="topbar-title" id="topbarTitle">Dashboard</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:12px;color:var(--muted);">Cohort 1 · June 2026</span>
+          <button class="btn btn-amber btn-sm" onclick="goTab('deadline')">📅 Deadline: 13 Jul</button>
+        </div>
+      </div>
+      <div class="content" id="mainContent"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════════
+var COURSES=[
+  {
+    id:'c1', color:'#1A2E6C', label:'Course 01',
+    title:'Theory of Ancient Music',
+    students:20, enrolled:20,
+    deadline:'2026-07-13',
+    modules:[
+      {title:'The Origin of Music', questions:6, completions:16, attempts:24},
+      {title:'Medieval Times & Sacred Rhythm', questions:6, completions:11, attempts:19},
+      {title:'Evolution of Musical Instruments', questions:6, completions:6, attempts:9},
+    ]
+  },
+  {
+    id:'c2', color:'#D97706', label:'Course 02',
+    title:'Liturgical Music Theology',
+    students:18, enrolled:18,
+    deadline:'2026-07-13',
+    modules:[
+      {title:'The Theology of Sacred Sound', questions:6, completions:14, attempts:20},
+      {title:'Vatican II and the Reform of Liturgy', questions:6, completions:9, attempts:15},
+      {title:'Music and the Sacraments', questions:6, completions:5, attempts:8},
+      {title:'Inculturation in Nigerian Worship', questions:6, completions:2, attempts:4},
+    ]
+  },
+  {
+    id:'c3', color:'#16A34A', label:'Course 03',
+    title:'Choral Leadership',
+    students:12, enrolled:12,
+    deadline:'2026-07-13',
+    modules:[
+      {title:'The Role of the Choir Director', questions:6, completions:10, attempts:14},
+      {title:'Rehearsal Technique and Planning', questions:6, completions:7, attempts:11},
+      {title:'Voice Training Fundamentals', questions:6, completions:4, attempts:7},
+      {title:'Leading the Sunday Mass', questions:6, completions:1, attempts:3},
+      {title:'Choir Administration', questions:6, completions:0, attempts:0},
+    ]
+  }
+];
+
+var STUDENTS=[
+  {name:'Chioma Eze',      email:'chioma.eze@gmail.com',      course:'c1', m:[2,2,1], pct:78, lastSeen:0},
+  {name:'Emeka Okafor',    email:'emeka.o@yahoo.com',          course:'c1', m:[2,1,0], pct:44, lastSeen:2},
+  {name:'Blessing Ojo',    email:'blessing.ojo@gmail.com',     course:'c1', m:[2,2,2], pct:100,lastSeen:1},
+  {name:'Ifeanyi Nwosu',   email:'ifeanyi.n@gmail.com',        course:'c1', m:[2,1,0], pct:44, lastSeen:6},
+  {name:'Adaeze Obi',      email:'adaeze.obi@gmail.com',       course:'c1', m:[2,2,2], pct:100,lastSeen:1},
+  {name:'Tobenna Chukwu',  email:'tobenna@gmail.com',          course:'c1', m:[2,2,1], pct:78, lastSeen:3},
+  {name:'Ngozi Emelie',    email:'ngozi.e@gmail.com',          course:'c1', m:[2,0,0], pct:22, lastSeen:8},
+  {name:'Chukwudi Ike',    email:'chukwudi.ike@gmail.com',     course:'c1', m:[1,0,0], pct:11, lastSeen:9},
+  {name:'Amaka Nwofor',    email:'amaka.n@gmail.com',          course:'c2', m:[2,2,1], pct:75, lastSeen:1},
+  {name:'Obinna Agu',      email:'obinna.agu@gmail.com',       course:'c2', m:[2,1,0], pct:50, lastSeen:4},
+  {name:'Uchenna Dim',     email:'uchenna.d@gmail.com',        course:'c2', m:[2,2,2], pct:100,lastSeen:0},
+  {name:'Chinyere Oti',    email:'chinyere.o@gmail.com',       course:'c2', m:[1,0,0], pct:25, lastSeen:7},
+  {name:'Nkechi Osu',      email:'nkechi.osu@gmail.com',       course:'c2', m:[2,2,0], pct:50, lastSeen:2},
+  {name:'Ikenna Mba',      email:'ikenna.mba@gmail.com',       course:'c2', m:[2,2,1], pct:75, lastSeen:3},
+  {name:'Chiamaka Eze',    email:'chiamaka.e@gmail.com',       course:'c3', m:[2,2,1,0,0], pct:60, lastSeen:2},
+  {name:'Emeka Ugwu',      email:'emeka.ugwu@gmail.com',       course:'c3', m:[2,1,0,0,0], pct:40, lastSeen:5},
+  {name:'Ifeoma Nze',      email:'ifeoma.nze@gmail.com',       course:'c3', m:[2,2,2,1,0], pct:80, lastSeen:1},
+  {name:'Chukwuemeka Odo', email:'chukwuemeka.o@gmail.com',   course:'c3', m:[2,2,2,2,0], pct:80, lastSeen:0},
+];
+// m values: 0=not started, 1=in progress, 2=done
+
+var QUESTIONS={
+  c1:[
+    {q:'What is the oldest notated song ever recovered?',opts:['The Gregorian Chant','The Hurrian Hymn No. 6','The Psalms of David','The Egyptian Book of Ra'],ans:1,fails:8},
+    {q:'Which philosopher discovered musical intervals as mathematical ratios?',opts:['Aristotle','Plato','Pythagoras','Socrates'],ans:2,fails:3},
+    {q:'How old are the oldest known musical instruments?',opts:['5,000 years','15,000 years','40,000 years','100,000 years'],ans:2,fails:5},
+    {q:'Who developed the staff notation system?',opts:['Pope Gregory I','Bach','Guido d\'Arezzo','Leonin'],ans:2,fails:11},
+    {q:'What instrument is called the King of Instruments?',opts:['The harp','The violin','The pipe organ','The trumpet'],ans:2,fails:4},
+    {q:'Which Vatican Council opened the door to inculturation?',opts:['First Vatican','Council of Trent','Second Vatican','Council of Nicaea'],ans:2,fails:6},
+  ],
+  c2:[
+    {q:'Who defined sacred music in Tra le Sollecitudini?',opts:['Pope John XXIII','Pope Gregory I','Pope Pius X','Pope Paul VI'],ans:2,fails:9},
+    {q:'What does "a cappella" mean in liturgical context?',opts:['Without instruments','Without choir','With organ only','In Latin only'],ans:0,fails:4},
+    {q:'Which document governs music in the Catholic Mass today?',opts:['Lumen Gentium','Sacrosanctum Concilium','Gaudium et Spes','Musicam Sacram'],ans:3,fails:12},
+    {q:'What is inculturation in worship?',opts:['Replacing Latin with English','Using indigenous music in the liturgy','Banning instruments','Copying Western hymns'],ans:1,fails:5},
+  ],
+  c3:[
+    {q:'What is the primary role of a choir director during Mass?',opts:['To perform solos','To lead and coordinate the choir in worship','To play instruments','To select the priest\'s readings'],ans:1,fails:3},
+    {q:'How should a rehearsal opening be structured?',opts:['Dive straight into difficult pieces','Warm-up, easy pieces, then challenging','Start with the hardest','No structure needed'],ans:1,fails:5},
+    {q:'What is breath support in choral singing?',opts:['Breathing loudly','Using the diaphragm to control airflow','Holding breath while singing','Breathing through the mouth only'],ans:1,fails:7},
+  ]
+};
+
+var ANNOUNCEMENTS=[
+  {text:'Physical examination confirmed for Saturday 19 July 2026. Venue: St. Peter\'s Catholic Church Hall, Ekete Inland. All students must complete their modules by 13 July.', date:'10 June 2026'},
+  {text:'Module content for Course 02 Module 4 (Inculturation) has been updated. Students currently on that module will see the new version immediately.', date:'5 June 2026'},
+];
+
+// ══════════════════════════════════════════════════════
+// LOGIN
+// ══════════════════════════════════════════════════════
+function doLogin(){
+  var u=document.getElementById('loginUser').value.trim().toLowerCase();
+  var p=document.getElementById('loginPass').value.trim().toLowerCase();
+  var err=document.getElementById('loginErr');
+  if(!u||!p){err.textContent='Please enter both fields.';err.style.display='block';return;}
+  if(u!=='dale'||p!=='dale'){err.textContent='Incorrect credentials.';err.style.display='block';return;}
+  err.style.display='none';
+  document.getElementById('screen-login').classList.remove('active');
+  document.getElementById('screen-app').classList.add('active');
+  goTab('dashboard');
+}
+function logout(){
+  document.getElementById('screen-app').classList.remove('active');
+  document.getElementById('screen-login').classList.add('active');
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginPass').value='';
+}
+
+// ══════════════════════════════════════════════════════
+// TAB ROUTING
+// ══════════════════════════════════════════════════════
+var TABS=['dashboard','content','courses','questions','students','progress','atrisk','deadline','analytics','announce'];
+var TITLES={dashboard:'Dashboard',content:'Content Manager',courses:'Courses & Modules',questions:'Question Bank',students:'All Students',progress:'Progress Records',atrisk:'At-Risk Students',deadline:'Cohort Deadline',analytics:'Assessment Analytics',announce:'Announcements'};
+
+function goTab(tab){
+  TABS.forEach(t=>{
+    var n=document.getElementById('nav-'+t);
+    if(n) n.classList.toggle('active',t===tab);
+  });
+  document.getElementById('topbarTitle').textContent=TITLES[tab]||tab;
+  var renders={dashboard:renderDashboard,content:renderContent,courses:renderCourses,questions:renderQuestions,students:renderStudents,progress:renderProgress,atrisk:renderAtRisk,deadline:renderDeadline,analytics:renderAnalytics,announce:renderAnnounce};
+  if(renders[tab]) renders[tab]();
+}
+
+// ══════════════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════════════
+function set(id,html){var el=document.getElementById(id);if(el)el.innerHTML=html;}
+function mc(){return document.getElementById('mainContent');}
+function courseById(id){return COURSES.find(c=>c.id===id);}
+function courseStudents(id){return STUDENTS.filter(s=>s.course===id);}
+function examReady(s){return s.m.every(v=>v===2);}
+function daysLeft(){
+  var now=new Date(); var d=new Date('2026-07-13');
+  return Math.max(0,Math.ceil((d-now)/(1000*60*60*24)));
+}
+function statusPill(v){
+  if(v===2) return '<span class="pill pill-green">Done</span>';
+  if(v===1) return '<span class="pill pill-amber">In Progress</span>';
+  return '<span class="pill pill-gray">Not Started</span>';
+}
+function lastSeenLabel(d){
+  if(d===0) return 'Today';
+  if(d===1) return 'Yesterday';
+  return d+' days ago';
+}
+function bar(pct,color){
+  color=color||'var(--blue)';
+  return `<div class="prog-bar-bg"><div class="prog-bar-fill" style="width:${pct}%;background:${color}"></div></div>`;
+}
+
+// ══════════════════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════════════════
+function renderDashboard(){
+  var total=STUDENTS.length;
+  var ready=STUDENTS.filter(examReady).length;
+  var atRisk=STUDENTS.filter(s=>s.lastSeen>=5).length;
+  var dl=daysLeft();
+  mc().innerHTML=`
+  <div class="deadline-banner">
+    <div class="deadline-banner-icon">📅</div>
+    <div class="deadline-banner-body">
+      <div class="deadline-banner-title">Cohort 1 Module Deadline</div>
+      <div class="deadline-banner-sub">All students must complete their modules by <strong style="color:white;">13 July 2026</strong> to sit the physical examination on 19 July 2026.</div>
+    </div>
+    <div class="deadline-countdown">
+      <div class="deadline-days">${dl}</div>
+      <div class="deadline-days-label">days left</div>
+    </div>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat s-blue"><div class="stat-num">${total}</div><div class="stat-label">Total Students</div><div class="stat-sub">Across 3 courses</div></div>
+    <div class="stat s-green"><div class="stat-num">${ready}</div><div class="stat-label">Exam Ready</div><div class="stat-sub">All modules done</div></div>
+    <div class="stat s-amber"><div class="stat-num">${total-ready}</div><div class="stat-label">Still In Progress</div><div class="stat-sub">${dl} days remaining</div></div>
+    <div class="stat s-red"><div class="stat-num">${atRisk}</div><div class="stat-label">At Risk</div><div class="stat-sub">No activity 5+ days</div></div>
+    <div class="stat s-purple"><div class="stat-num">3</div><div class="stat-label">Active Courses</div><div class="stat-sub">${total} students total</div></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+    <div class="card">
+      <div class="card-hdr"><div class="card-title">Enrolment by Course</div></div>
+      <div class="card-body">
+        ${COURSES.map(c=>`
+          <div style="margin-bottom:12px;">
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+              <span style="color:var(--text);">${c.title}</span>
+              <span style="font-weight:600;color:var(--blue);">${c.students}</span>
+            </div>
+            ${bar(Math.round(c.students/50*100),c.color)}
+          </div>`).join('')}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><div class="card-title">Exam Eligibility Progress</div></div>
+      <div class="card-body">
+        ${COURSES.map(c=>{
+          var sts=courseStudents(c.id);
+          var rd=sts.filter(examReady).length;
+          var pct=Math.round(rd/sts.length*100);
+          return `<div style="margin-bottom:12px;">
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+              <span>${c.label}</span>
+              <span style="font-weight:600;color:var(--ok);">${rd}/${sts.length} ready</span>
+            </div>
+            ${bar(pct,'var(--ok)')}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hdr">
+      <div class="card-title">Recent Activity</div>
+      <button class="btn btn-outline btn-sm" onclick="goTab('progress')">View all →</button>
+    </div>
+    <table class="tbl">
+      <thead><tr><th>Student</th><th>Course</th><th>Action</th><th>Last Seen</th></tr></thead>
+      <tbody>
+        ${STUDENTS.slice(0,8).map(s=>{
+          var c=courseById(s.course);
+          var done=s.m.filter(v=>v===2).length;
+          var total=s.m.length;
+          return `<tr>
+            <td><div style="font-weight:500;">${s.name}</div><div style="font-size:11px;color:var(--muted);">${s.email}</div></td>
+            <td><span class="pill pill-blue" style="font-size:10px;">${c.label}</span></td>
+            <td>${s.pct===100?'<span class="pill pill-green">Exam Ready</span>':s.pct>50?'<span class="pill pill-amber">Good Progress</span>':'<span class="pill pill-red">Needs Attention</span>'}</td>
+            <td style="font-size:12px;color:${s.lastSeen>=5?'var(--danger)':'var(--muted)'};">${lastSeenLabel(s.lastSeen)}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════════════
+// CONTENT MANAGER
+// ══════════════════════════════════════════════════════
+var cmState={
+  selectedCourse: null,
+  selectedModule: null,
+  contentMode: 'type', // 'type' or 'upload'
+  questions: [], // question blocks for current module
+  uploadedContent: null,
+  published: false
+};
+
+// Seed some demo module content
+var MODULE_CONTENT = {
+  'c1-0': { html: '<h2>Where Did Music Begin?</h2><p>The question of music\'s origin is as old as civilisation itself. Ancient Greek philosophers believed music was a gift from the gods...</p><h2>Music in Ancient Civilisations</h2><p>In ancient Mesopotamia, the Sumerians developed one of the earliest musical traditions...</p>', published: true },
+  'c1-1': { html: '<h2>The Medieval Musical World</h2><p>The medieval period, roughly 500 CE to 1400 CE, was defined by the dominance of the Catholic Church...</p>', published: true },
+  'c1-2': { html: '<h2>From Bone to Brass</h2><p>The story of musical instruments is the story of human ingenuity across every era and culture...</p>', published: true },
+};
+
+function renderContent(){
+  mc().innerHTML=`<div class="cm-layout"><div id="cm-left"></div><div id="cm-right"></div></div>`;
+  renderCMSidebar();
+  if(!cmState.selectedCourse) {
+    document.getElementById('cm-right').innerHTML=`
+      <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;padding:48px 32px;text-align:center;">
+        <div style="font-size:40px;margin-bottom:16px;">✏️</div>
+        <div style="font-family:'DM Serif Display',serif;font-size:22px;color:var(--text);margin-bottom:8px;">Content Manager</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.7;max-width:380px;margin:0 auto 24px;">Select a course and module from the panel on the left to edit its reading content and build its question bank.</div>
+        <button class="btn btn-primary" onclick="showNewCourseModal()">+ Create New Course</button>
+      </div>`;
+  }
+}
+
+function renderCMSidebar(){
+  var html=`<div class="cm-sidebar">
+    <div class="cm-sidebar-hdr" style="display:flex;align-items:center;justify-content:space-between;">
+      Curriculum
+      <button class="btn btn-primary btn-xs" onclick="showNewCourseModal()">+ Course</button>
+    </div>`;
+  COURSES.forEach(c=>{
+    var isOpen=cmState.selectedCourse===c.id;
+    html+=`<div class="cm-course-group">
+      <div class="cm-course-label" onclick="toggleCMCourse('${c.id}')">
+        <div class="cm-course-dot" style="background:${c.color};"></div>
+        <span style="flex:1;">${c.label}: ${c.title.split(' ').slice(0,3).join(' ')}...</span>
+        <span style="font-size:10px;">${isOpen?'▼':'▶'}</span>
+      </div>`;
+    if(isOpen){
+      html+=`<div class="cm-module-list">`;
+      c.modules.forEach((m,i)=>{
+        var key=`${c.id}-${i}`;
+        var hasContent=!!MODULE_CONTENT[key];
+        var isActive=cmState.selectedModule===key;
+        var dotColor=hasContent?'var(--ok)':'var(--border)';
+        html+=`<div class="cm-module-item${isActive?' active':''}" onclick="selectCMModule('${c.id}',${i})">
+          <div class="cm-module-status" style="background:${dotColor};"></div>
+          ${m.title.length>26?m.title.substring(0,24)+'...':m.title}
+        </div>`;
+      });
+      html+=`<div class="cm-add-module"><button class="btn btn-outline btn-xs" style="width:100%;" onclick="addNewModule('${c.id}')">+ Add Module</button></div>`;
+      html+=`</div>`;
+    }
+    html+=`</div>`;
+  });
+  html+=`</div>`;
+  document.getElementById('cm-left').innerHTML=html;
+}
+
+function toggleCMCourse(id){
+  cmState.selectedCourse = cmState.selectedCourse===id ? null : id;
+  cmState.selectedModule = null;
+  renderContent();
+}
+
+function selectCMModule(courseId,modIdx){
+  var key=`${courseId}-${modIdx}`;
+  cmState.selectedCourse=courseId;
+  cmState.selectedModule=key;
+  var c=courseById(courseId);
+  var m=c.modules[modIdx];
+  var existing=MODULE_CONTENT[key];
+  cmState.published=existing?existing.published||false:false;
+  cmState.questions=QUESTIONS[courseId]?
+    QUESTIONS[courseId].filter((_,i)=>i<3).map(q=>({...q})):
+    [{q:'',opts:['','','',''],ans:0}];
+  renderCMSidebar();
+  renderCMEditor(c,m,key,existing);
+}
+
+function renderCMEditor(c,m,key,existing){
+  var content=existing?existing.html:'';
+  document.getElementById('cm-right').innerHTML=`
+  <div class="card">
+    <div class="card-hdr" style="gap:12px;flex-wrap:wrap;">
+      <div>
+        <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;">${c.label}</div>
+        <div class="card-title">${m.title}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;margin-left:auto;flex-wrap:wrap;">
+        <div class="pub-toggle">
+          <div class="pub-switch${cmState.published?' on':''}" id="pubSwitch" onclick="togglePublish()">
+            <div class="pub-switch-dot"></div>
+          </div>
+          <span style="font-size:12px;color:var(--muted);" id="pubLabel">${cmState.published?'Published':'Draft'}</span>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="saveModule('${key}')">Save Module</button>
+      </div>
+    </div>
+    <div class="card-body">
+
+      <!-- SECTION 1: READING CONTENT -->
+      <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--blue);margin-bottom:10px;">01 — Reading Content</div>
+
+      <div class="mode-tabs">
+        <div class="mode-tab${cmState.contentMode==='type'?' active':''}" onclick="switchCMMode('type','${key}')">Type / Paste</div>
+        <div class="mode-tab${cmState.contentMode==='upload'?' active':''}" onclick="switchCMMode('upload','${key}')">Upload .docx</div>
+      </div>
+
+      <div id="cm-type-panel" style="display:${cmState.contentMode==='type'?'block':'none'};">
+        <div class="rte-toolbar">
+          <button class="rte-btn" onclick="rteCmd('formatBlock','H2')" title="Heading">H2</button>
+          <button class="rte-btn" onclick="rteCmd('formatBlock','P')" title="Paragraph">¶</button>
+          <div class="rte-sep"></div>
+          <button class="rte-btn" onclick="rteCmd('bold')" title="Bold"><strong>B</strong></button>
+          <button class="rte-btn" onclick="rteCmd('italic')" title="Italic"><em>I</em></button>
+          <div class="rte-sep"></div>
+          <button class="rte-btn" onclick="rteCmd('removeFormat')" title="Clear formatting">✕ Clear</button>
+        </div>
+        <div class="rte-area" id="rteArea" contenteditable="true" spellcheck="true">${content||'<p>Start typing the module reading content here...</p>'}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px;">Use H2 for section headings. Each paragraph break creates a new reading block. Students see exactly what you type here.</div>
+      </div>
+
+      <div id="cm-upload-panel" style="display:${cmState.contentMode==='upload'?'block':'none'};">
+        <div class="drop-zone" id="dropZone" onclick="document.getElementById('docxInput').click()"
+          ondragover="event.preventDefault();this.classList.add('dragover')"
+          ondragleave="this.classList.remove('dragover')"
+          ondrop="handleDrop(event)">
+          <div class="drop-zone-icon">📄</div>
+          <div class="drop-zone-title">Drop your .docx file here</div>
+          <div class="drop-zone-sub">or click to browse &nbsp;·&nbsp; Word documents only (.docx)</div>
+          <input type="file" id="docxInput" accept=".docx" style="display:none;" onchange="handleDocxUpload(this)"/>
+        </div>
+        <div id="uploadPreview" style="display:none;margin-top:12px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <span style="font-size:12px;font-weight:600;color:var(--ok);">✓ Document extracted successfully</span>
+            <button class="btn btn-outline btn-xs" onclick="document.getElementById('uploadPreview').style.display='none';document.getElementById('dropZone').style.display='block'">Replace file</button>
+          </div>
+          <div class="content-preview" id="uploadPreviewContent"></div>
+          <div style="font-size:11px;color:var(--muted);margin-top:6px;">This is what students will read. If it looks wrong, switch to Type mode and paste the corrected text.</div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: QUESTION BANK -->
+      <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--blue);margin:28px 0 10px;">02 — Question Bank <span style="font-size:10px;font-weight:400;color:var(--muted);letter-spacing:0;text-transform:none;">· 3 questions shown to students per attempt</span></div>
+
+      <div id="qBuilderList"></div>
+
+      <button class="btn btn-outline btn-sm" onclick="addQBlock()" style="width:100%;margin-top:4px;">+ Add Question</button>
+
+      <div id="cmSaveMsg" class="msg-ok" style="margin-top:16px;"></div>
+    </div>
+  </div>`;
+
+  renderQBuilder();
+}
+
+function switchCMMode(mode){
+  cmState.contentMode=mode;
+  document.getElementById('cm-type-panel').style.display=mode==='type'?'block':'none';
+  document.getElementById('cm-upload-panel').style.display=mode==='upload'?'block':'none';
+  document.querySelectorAll('.mode-tab').forEach((t,i)=>t.classList.toggle('active',(i===0&&mode==='type')||(i===1&&mode==='upload')));
+}
+
+function rteCmd(cmd,val){
+  document.getElementById('rteArea').focus();
+  document.execCommand(cmd,false,val||null);
+}
+
+function togglePublish(){
+  cmState.published=!cmState.published;
+  var sw=document.getElementById('pubSwitch');
+  var lb=document.getElementById('pubLabel');
+  sw.classList.toggle('on',cmState.published);
+  lb.textContent=cmState.published?'Published':'Draft';
+}
+
+// ── .docx upload handler ────────────────────────────────────────────
+// In production this calls a Vercel serverless function with mammoth.js
+// For demo: simulate extraction with a placeholder
+function handleDocxUpload(input){
+  var file=input.files[0];
+  if(!file||!file.name.endsWith('.docx')){
+    alert('Please select a .docx Word document.');return;
+  }
+  var dropZone=document.getElementById('dropZone');
+  var preview=document.getElementById('uploadPreview');
+  var previewContent=document.getElementById('uploadPreviewContent');
+  dropZone.style.display='none';
+  previewContent.innerHTML=`<p style="color:var(--muted);font-style:italic;">Extracting content from <strong>${file.name}</strong>...</p>`;
+  preview.style.display='block';
+  // Simulate server-side mammoth extraction (in production: POST to /api/extract-docx)
+  setTimeout(()=>{
+    var simulatedHTML=`<h2>Content Extracted from ${file.name}</h2>
+<p>In a live deployment, this text is extracted directly from your Word document using mammoth.js on the server. All paragraphs, headings, and formatting are preserved and converted to clean HTML.</p>
+<h2>How It Works</h2>
+<p>Your .docx file is uploaded to a secure Vercel serverless function. The function reads the document, converts it to HTML, and returns it here for your review. The process takes about 2 seconds.</p>
+<p>Once you confirm the content looks correct, click Save Module and it becomes the live reading material for this module. Students will see exactly this text when they open the module.</p>`;
+    previewContent.innerHTML=simulatedHTML;
+    cmState.uploadedContent=simulatedHTML;
+  },1200);
+}
+
+function handleDrop(e){
+  e.preventDefault();
+  document.getElementById('dropZone').classList.remove('dragover');
+  var file=e.dataTransfer.files[0];
+  if(file){
+    var input=document.getElementById('docxInput');
+    var dt=new DataTransfer();
+    dt.items.add(file);
+    input.files=dt.files;
+    handleDocxUpload(input);
+  }
+}
+
+// ── Question builder ───────────────────────────────────────────────
+function renderQBuilder(){
+  var list=document.getElementById('qBuilderList');
+  if(!list) return;
+  list.innerHTML=cmState.questions.map((q,i)=>buildQBlock(q,i)).join('');
+  // Highlight correct option inputs
+  cmState.questions.forEach((_,i)=>highlightCorrect(i));
+}
+
+function buildQBlock(q,i){
+  var letters=['A','B','C','D'];
+  return `<div class="q-builder-block" id="qblock-${i}">
+    <div class="q-builder-num">${i+1}</div>
+    <div class="q-builder-body">
+      <input class="q-builder-text" placeholder="Question text..." value="${escQ(q.q)}" oninput="cmState.questions[${i}].q=this.value" id="qt-${i}"/>
+      <div class="q-opts-grid">
+        ${letters.map((l,oi)=>`
+          <div class="q-opt-wrap">
+            <span class="q-opt-label">${l}</span>
+            <input class="q-opt-input${q.ans===oi?' is-correct':''}" id="qo-${i}-${oi}"
+              placeholder="Option ${l}..." value="${escQ(q.opts[oi]||'')}"
+              oninput="cmState.questions[${i}].opts[${oi}]=this.value"
+              onfocus="highlightCorrect(${i})"/>
+          </div>`).join('')}
+      </div>
+      <div class="q-correct-row">
+        <span class="q-correct-label">Correct answer:</span>
+        <select class="q-correct-select" onchange="setCorrect(${i},this.value)" id="qans-${i}">
+          ${letters.map((l,oi)=>`<option value="${oi}"${q.ans===oi?' selected':''}>Option ${l}</option>`).join('')}
+        </select>
+        <div style="font-size:11px;color:var(--muted);margin-left:4px;">Students never see this on a failed attempt</div>
+        ${cmState.questions.length>1?`<button class="q-remove-btn" onclick="removeQBlock(${i})">Remove</button>`:''}
+      </div>
+    </div>
+  </div>`;
+}
+
+function escQ(s){return (s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+
+function setCorrect(i,val){
+  cmState.questions[i].ans=parseInt(val);
+  highlightCorrect(i);
+}
+
+function highlightCorrect(i){
+  var q=cmState.questions[i];
+  [0,1,2,3].forEach(oi=>{
+    var el=document.getElementById('qo-'+i+'-'+oi);
+    if(el) el.classList.toggle('is-correct',oi===q.ans);
+  });
+}
+
+function addQBlock(){
+  cmState.questions.push({q:'',opts:['','','',''],ans:0});
+  renderQBuilder();
+  // Scroll to new block
+  var list=document.getElementById('qBuilderList');
+  if(list) list.lastElementChild.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function removeQBlock(i){
+  if(cmState.questions.length<=1){alert('Each module must have at least one question.');return;}
+  cmState.questions.splice(i,1);
+  renderQBuilder();
+}
+
+// ── Save module ────────────────────────────────────────────────────
+function saveModule(key){
+  // Get content from whichever mode is active
+  var html='';
+  if(cmState.contentMode==='type'){
+    var area=document.getElementById('rteArea');
+    html=area?area.innerHTML:'';
+  } else {
+    html=cmState.uploadedContent||'';
+  }
+  if(!html.trim()||html==='<p>Start typing the module reading content here...</p>'){
+    alert('Please add reading content before saving.');return;
+  }
+  // Validate questions
+  var qErrors=cmState.questions.filter(q=>!q.q.trim()||q.opts.some(o=>!o.trim()));
+  if(qErrors.length){
+    alert('Please complete all question fields before saving.');return;
+  }
+  // Save to demo store
+  MODULE_CONTENT[key]={html,published:cmState.published};
+  // Update question bank
+  var parts=key.split('-');
+  var cid=parts[0]+'-'+parts[1];
+  // find course id
+  var cid2=COURSES.find(c=>key.startsWith(c.id))?.id;
+  if(cid2) QUESTIONS[cid2]=cmState.questions.slice();
+  // Update sidebar dot
+  renderCMSidebar();
+  var msg=document.getElementById('cmSaveMsg');
+  msg.textContent=cmState.published
+    ?'✓ Module saved and published. Students can access it immediately.'
+    :'✓ Module saved as draft. Toggle to Published when ready.';
+  msg.style.display='block';
+  setTimeout(()=>msg.style.display='none',4000);
+}
+
+// ── New course modal ───────────────────────────────────────────────
+function showNewCourseModal(){
+  var modal=document.createElement('div');
+  modal.id='newCourseModal';
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;';
+  modal.innerHTML=`<div style="background:white;border-radius:16px;padding:32px;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+    <div style="font-family:'DM Serif Display',serif;font-size:22px;color:var(--text);margin-bottom:6px;">New Course</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:22px;">Create a new course. You can add modules and content after saving.</div>
+    <div class="form-group"><label class="form-label">Course Code</label><input class="form-input" id="ncCode" placeholder="e.g. Course 04"/></div>
+    <div class="form-group"><label class="form-label">Course Title</label><input class="form-input" id="ncTitle" placeholder="e.g. Sacred Music Composition"/></div>
+    <div class="form-group"><label class="form-label">Short Description</label><textarea class="form-input form-textarea" id="ncDesc" style="min-height:80px;" placeholder="What will students learn in this course?"></textarea></div>
+    <div class="form-group">
+      <label class="form-label">Course Colour</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        ${['#1A2E6C','#D97706','#16A34A','#7C3AED','#DC2626','#0891B2'].map(col=>`<div onclick="document.getElementById('ncColor').value='${col}';document.querySelectorAll('.color-swatch').forEach(s=>s.style.outline='none');this.style.outline='3px solid var(--text)';" class="color-swatch" style="width:28px;height:28px;border-radius:7px;background:${col};cursor:pointer;transition:outline 0.15s;"></div>`).join('')}
+        <input type="hidden" id="ncColor" value="#1A2E6C"/>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:4px;">
+      <button class="btn btn-primary" onclick="createCourse()">Create Course</button>
+      <button class="btn btn-outline" onclick="document.getElementById('newCourseModal').remove()">Cancel</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
+}
+
+function createCourse(){
+  var code=document.getElementById('ncCode').value.trim();
+  var title=document.getElementById('ncTitle').value.trim();
+  var color=document.getElementById('ncColor').value;
+  if(!code||!title){alert('Course code and title are required.');return;}
+  var newCourse={id:'c'+(COURSES.length+1),color,label:code,title,students:0,enrolled:0,deadline:'2026-07-13',modules:[]};
+  COURSES.push(newCourse);
+  document.getElementById('newCourseModal').remove();
+  cmState.selectedCourse=newCourse.id;
+  cmState.selectedModule=null;
+  renderContent();
+}
+
+function addNewModule(courseId){
+  var name=prompt('Module title:');
+  if(!name||!name.trim()) return;
+  var c=courseById(courseId);
+  c.modules.push({title:name.trim(),questions:0,completions:0,attempts:0});
+  renderCMSidebar();
+  selectCMModule(courseId,c.modules.length-1);
+}
+function renderCourses(){
+  mc().innerHTML=`
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+    <p style="font-size:13px;color:var(--muted);">${COURSES.length} active courses · ${STUDENTS.length} students enrolled</p>
+    <button class="btn btn-primary btn-sm" onclick="showAddCourseForm()">+ New Course</button>
+  </div>
+  <div id="addCourseFormWrap" style="display:none;" class="card">
+    <div class="card-hdr"><div class="card-title">Add New Course</div></div>
+    <div class="card-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Course Title</label><input class="form-input" id="newCourseTitle" placeholder="e.g. Sacred Music Composition"/></div>
+        <div class="form-group"><label class="form-label">Course Code</label><input class="form-input" id="newCourseCode" placeholder="e.g. Course 04"/></div>
+      </div>
+      <div class="form-group"><label class="form-label">Description</label><textarea class="form-input form-textarea" id="newCourseDesc" style="min-height:70px;"></textarea></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-primary btn-sm" onclick="addCourse()">Create Course</button>
+        <button class="btn btn-outline btn-sm" onclick="document.getElementById('addCourseFormWrap').style.display='none'">Cancel</button>
+      </div>
+      <div id="courseSaveMsg" class="msg-ok" style="margin-top:10px;"></div>
+    </div>
+  </div>
+  ${COURSES.map(c=>{
+    var sts=courseStudents(c.id);
+    var ready=sts.filter(examReady).length;
+    var avgPct=Math.round(sts.reduce((a,s)=>a+s.pct,0)/sts.length);
+    var dl=daysLeft();
+    return `<div class="course-block" id="cb-${c.id}">
+      <div class="course-block-hdr" onclick="toggleCourse('${c.id}')">
+        <span class="course-chevron">▶</span>
+        <div class="course-color" style="background:${c.color};"></div>
+        <div class="course-block-title">${c.title}</div>
+        <div class="course-block-meta">
+          <span class="pill pill-blue">${sts.length} students</span>
+          <span class="pill pill-green">${ready} exam ready</span>
+          <span class="pill ${dl<=7?'pill-red':'pill-amber'}">${dl}d to deadline</span>
+        </div>
+      </div>
+      <div class="course-body">
+        <div class="course-stats-row">
+          <div class="course-stat-chip"><div class="course-stat-num">${sts.length}</div><div class="course-stat-label">Enrolled</div></div>
+          <div class="course-stat-chip"><div class="course-stat-num">${ready}</div><div class="course-stat-label">Exam Ready</div></div>
+          <div class="course-stat-chip"><div class="course-stat-num">${sts.length-ready}</div><div class="course-stat-label">In Progress</div></div>
+          <div class="course-stat-chip"><div class="course-stat-num">${avgPct}%</div><div class="course-stat-label">Avg Progress</div></div>
+          <div class="course-stat-chip"><div class="course-stat-num">${c.modules.length}</div><div class="course-stat-label">Modules</div></div>
+        </div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Modules</div>
+        ${c.modules.map((m,i)=>{
+          var compPct=Math.round(m.completions/sts.length*100);
+          return `<div class="module-row">
+            <div class="mod-num">${i+1}</div>
+            <div class="mod-info">
+              <div class="mod-name">${m.title}</div>
+              <div class="mod-meta">${m.questions} questions in pool &nbsp;·&nbsp; ${m.attempts} total attempts &nbsp;·&nbsp; ${m.completions}/${sts.length} completed</div>
+            </div>
+            <div class="prog-mini">
+              ${bar(compPct,c.color)}
+              <div class="prog-label">${compPct}%</div>
+            </div>
+            <div class="mod-actions">
+              <button class="btn btn-outline btn-xs">Edit</button>
+              <button class="btn btn-outline btn-xs" onclick="goTab('questions')">Questions</button>
+            </div>
+          </div>`;
+        }).join('')}
+        <div style="margin-top:12px;display:flex;gap:8px;">
+          <button class="btn btn-primary btn-sm">+ Add Module</button>
+          <button class="btn btn-outline btn-sm" onclick="goTab('progress')">View Student Records</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('')}`;
+}
+
+function toggleCourse(id){
+  var el=document.getElementById('cb-'+id);
+  el.classList.toggle('open');
+}
+function showAddCourseForm(){
+  var w=document.getElementById('addCourseFormWrap');
+  w.style.display=w.style.display==='none'?'block':'none';
+}
+function addCourse(){
+  var title=document.getElementById('newCourseTitle').value.trim();
+  if(!title){alert('Title required.');return;}
+  var msg=document.getElementById('courseSaveMsg');
+  msg.textContent='Course created. You can now add modules and enrol students.';
+  msg.style.display='block';
+  setTimeout(()=>{msg.style.display='none';document.getElementById('addCourseFormWrap').style.display='none';},3000);
+}
+
+// ══════════════════════════════════════════════════════
+// QUESTION BANK
+// ══════════════════════════════════════════════════════
+function renderQuestions(){
+  mc().innerHTML=`
+  <div class="tab-bar" id="qTabBar">
+    ${COURSES.map((c,i)=>`<div class="tab ${i===0?'active':''}" onclick="switchQTab('${c.id}',this)">${c.label}</div>`).join('')}
+  </div>
+  <div id="qContent"></div>`;
+  renderQCourse('c1');
+}
+function switchQTab(id,el){
+  document.querySelectorAll('#qTabBar .tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderQCourse(id);
+}
+function renderQCourse(id){
+  var pool=QUESTIONS[id]||[];
+  var c=courseById(id);
+  document.getElementById('qContent').innerHTML=`
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+    <span style="font-size:13px;color:var(--muted);">${c.title} &nbsp;·&nbsp; ${pool.length} questions total &nbsp;·&nbsp; 3 shown per attempt</span>
+    <button class="btn btn-primary btn-sm" onclick="showAddQ('${id}')">+ Add Question</button>
+  </div>
+  <div id="addQForm-${id}" style="display:none;" class="card">
+    <div class="card-hdr"><div class="card-title">New Question</div></div>
+    <div class="card-body">
+      <div class="form-group"><label class="form-label">Question Text</label><input class="form-input" id="qt-${id}" placeholder="Type question here..."/></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Option A</label><input class="form-input" id="qa-${id}"/></div>
+        <div class="form-group"><label class="form-label">Option B</label><input class="form-input" id="qb-${id}"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Option C</label><input class="form-input" id="qc-${id}"/></div>
+        <div class="form-group"><label class="form-label">Option D</label><input class="form-input" id="qd-${id}"/></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Correct Answer</label>
+        <select class="form-input" id="qa-ans-${id}" style="max-width:180px;">
+          <option value="0">Option A</option><option value="1">Option B</option>
+          <option value="2">Option C</option><option value="3">Option D</option>
+        </select>
+        <div class="form-hint">Students never see the correct answer on a failed attempt. Only you see this.</div>
+      </div>
+      <div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm" onclick="saveQ('${id}')">Add to Bank</button><button class="btn btn-outline btn-sm" onclick="document.getElementById('addQForm-${id}').style.display='none'">Cancel</button></div>
+      <div id="qMsg-${id}" class="msg-ok" style="margin-top:10px;"></div>
+    </div>
+  </div>
+  ${pool.map((q,i)=>`
+    <div class="q-item">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div class="q-text">${i+1}. ${q.q}</div>
+        <div style="display:flex;gap:5px;flex-shrink:0;">
+          ${q.fails?`<span class="pill pill-red" title="Failed this many times across all students">${q.fails} fails</span>`:''}
+          <button class="btn btn-danger btn-xs" onclick="removeQ('${id}',${i})">Remove</button>
+        </div>
+      </div>
+      <div class="q-opts">
+        ${q.opts.map((o,oi)=>`<div class="q-opt ${oi===q.ans?'correct':''}">${String.fromCharCode(65+oi)}. ${o}${oi===q.ans?' ✓':''}</div>`).join('')}
+      </div>
+    </div>`).join('')}`;
+}
+function showAddQ(id){
+  var el=document.getElementById('addQForm-'+id);
+  el.style.display=el.style.display==='none'?'block':'none';
+}
+function saveQ(id){
+  var q=document.getElementById('qt-'+id).value.trim();
+  if(!q){alert('Question text required.');return;}
+  if(!QUESTIONS[id]) QUESTIONS[id]=[];
+  QUESTIONS[id].push({q,opts:['Option A','Option B','Option C','Option D'],ans:parseInt(document.getElementById('qa-ans-'+id).value),fails:0});
+  var msg=document.getElementById('qMsg-'+id);
+  msg.textContent='Question added to bank.';msg.style.display='block';
+  setTimeout(()=>{msg.style.display='none';document.getElementById('addQForm-'+id).style.display='none';renderQCourse(id);},2000);
+}
+function removeQ(id,i){
+  if(!confirm('Remove this question?'))return;
+  QUESTIONS[id].splice(i,1);renderQCourse(id);
+}
+
+// ══════════════════════════════════════════════════════
+// STUDENTS
+// ══════════════════════════════════════════════════════
+function renderStudents(){
+  mc().innerHTML=`
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+    <span style="font-size:13px;color:var(--muted);">${STUDENTS.length} students across 3 courses</span>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <input style="border:1.5px solid var(--border);border-radius:8px;padding:7px 12px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;width:200px;" placeholder="Search..." oninput="filterSt(this.value)" id="stSearch"/>
+      <button class="btn btn-primary btn-sm" onclick="toggleAddSt()">+ Add Student</button>
+    </div>
+  </div>
+  <div id="addStCard" style="display:none;" class="card">
+    <div class="card-hdr"><div class="card-title">Add Student</div></div>
+    <div class="card-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="stName" placeholder="e.g. Chioma Eze"/></div>
+        <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" id="stEmail" type="email" placeholder="e.g. chioma@gmail.com"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Assign Course</label><select class="form-input" id="stCourse">${COURSES.map(c=>`<option value="${c.id}">${c.label} — ${c.title}</option>`).join('')}</select></div>
+        <div class="form-group"><label class="form-label">Temporary Password</label><input class="form-input" id="stPass" placeholder="Student sets own on first login"/></div>
+      </div>
+      <div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm" onclick="addSt()">Create Account</button><button class="btn btn-outline btn-sm" onclick="toggleAddSt()">Cancel</button></div>
+      <div id="stAddMsg" class="msg-ok" style="margin-top:10px;"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hdr"><div class="card-title">All Students</div><button class="btn btn-outline btn-sm">Export CSV</button></div>
+    <table class="tbl" id="stTable">
+      <thead><tr><th>Name</th><th>Email</th><th>Course</th><th>Progress</th><th>Last Seen</th><th>Status</th><th></th></tr></thead>
+      <tbody id="stBody"></tbody>
+    </table>
+  </div>`;
+  renderStRows(STUDENTS);
+}
+function renderStRows(list){
+  document.getElementById('stBody').innerHTML=list.map((s,i)=>{
+    var c=courseById(s.course);
+    return `<tr>
+      <td><div style="font-weight:500;">${s.name}</div></td>
+      <td style="color:var(--muted);font-size:12px;">${s.email}</td>
+      <td><span class="pill pill-blue" style="font-size:10px;">${c.label}</span></td>
+      <td><div style="display:flex;align-items:center;gap:6px;">${bar(s.pct)}<span style="font-size:11px;color:var(--muted);white-space:nowrap;">${s.pct}%</span></div></td>
+      <td style="font-size:12px;color:${s.lastSeen>=5?'var(--danger)':'var(--muted)'};">${lastSeenLabel(s.lastSeen)}</td>
+      <td>${examReady(s)?'<span class="pill pill-green">Exam Ready</span>':'<span class="pill pill-amber">In Progress</span>'}</td>
+      <td><div style="display:flex;gap:5px;"><button class="btn btn-outline btn-xs" onclick="unlockModule(${STUDENTS.indexOf(s)})">Unlock Module</button><button class="btn btn-danger btn-xs">Remove</button></div></td>
+    </tr>`;
+  }).join('');
+}
+function filterSt(q){
+  renderStRows(STUDENTS.filter(s=>!q||s.name.toLowerCase().includes(q.toLowerCase())||s.email.toLowerCase().includes(q.toLowerCase())));
+}
+function toggleAddSt(){var c=document.getElementById('addStCard');c.style.display=c.style.display==='none'?'block':'none';}
+function addSt(){
+  var name=document.getElementById('stName').value.trim();
+  var email=document.getElementById('stEmail').value.trim();
+  var course=document.getElementById('stCourse').value;
+  if(!name||!email){alert('Name and email required.');return;}
+  var c=courseById(course);
+  STUDENTS.push({name,email,course,m:new Array(c.modules.length).fill(0),pct:0,lastSeen:0});
+  var msg=document.getElementById('stAddMsg');
+  msg.textContent='Account created for '+name+'. Login credentials sent to '+email+'.';
+  msg.style.display='block';
+  setTimeout(()=>{msg.style.display='none';toggleAddSt();renderStRows(STUDENTS);},3000);
+}
+function unlockModule(i){
+  var s=STUDENTS[i];
+  var locked=s.m.findIndex(v=>v===0);
+  if(locked===-1){alert(s.name+' has completed all modules.');return;}
+  if(confirm('Manually unlock Module '+(locked+1)+' for '+s.name+'? Only do this for genuine technical issues.')){
+    s.m[locked]=1;
+    s.pct=Math.round(s.m.filter(v=>v===2).length/s.m.length*100);
+    renderStRows(STUDENTS);
+    alert('Module '+(locked+1)+' unlocked for '+s.name+'.');
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// PROGRESS RECORDS
+// ══════════════════════════════════════════════════════
+function renderProgress(){
+  mc().innerHTML=`
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+    <div class="tab-bar" style="border:none;margin:0;gap:0;" id="progTabBar">
+      <div class="tab active" onclick="switchProgTab('all',this)">All Courses</div>
+      ${COURSES.map(c=>`<div class="tab" onclick="switchProgTab('${c.id}',this)">${c.label}</div>`).join('')}
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-outline btn-sm">Export CSV</button>
+      <button class="btn btn-primary btn-sm" onclick="goTab('students')" style="background:var(--ok);">🎓 Exam Eligibility List</button>
+    </div>
+  </div>
+  <div id="progContent"></div>`;
+  renderProgContent('all');
+}
+function switchProgTab(id,el){
+  document.querySelectorAll('#progTabBar .tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderProgContent(id);
+}
+function renderProgContent(filter){
+  var list=filter==='all'?STUDENTS:STUDENTS.filter(s=>s.course===filter);
+  // Build dynamic module headers
+  var maxMods=Math.max(...list.map(s=>s.m.length));
+  document.getElementById('progContent').innerHTML=`
+  <div class="card">
+    <table class="tbl">
+      <thead><tr><th>Student</th><th>Course</th>${Array.from({length:maxMods},(_,i)=>`<th>Mod ${i+1}</th>`).join('')}<th>Overall</th><th>Exam Ready</th></tr></thead>
+      <tbody>
+        ${list.map(s=>{
+          var c=courseById(s.course);
+          var modCells=s.m.map(v=>statusPill(v)).join('');
+          // Pad if fewer modules
+          for(var i=s.m.length;i<maxMods;i++) modCells+='<td style="color:var(--dim);">-</td>';
+          return `<tr>
+            <td><div style="font-weight:500;">${s.name}</div><div style="font-size:11px;color:var(--muted);">${s.email}</div></td>
+            <td><span class="pill pill-blue" style="font-size:10px;">${c.label}</span></td>
+            ${s.m.map(v=>`<td>${statusPill(v)}</td>`).join('')}
+            ${Array.from({length:maxMods-s.m.length},()=>`<td style="color:var(--dim);font-size:11px;">n/a</td>`).join('')}
+            <td><div style="display:flex;align-items:center;gap:5px;">${bar(s.pct)}<span style="font-size:11px;font-weight:600;">${s.pct}%</span></div></td>
+            <td>${examReady(s)?'<span class="pill pill-green">Yes</span>':'<span class="pill pill-gray">No</span>'}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════════════
+// AT-RISK
+// ══════════════════════════════════════════════════════
+function renderAtRisk(){
+  var risk=STUDENTS.filter(s=>s.lastSeen>=5);
+  document.getElementById('atrisk-badge').textContent=risk.length;
+  var wa=risk.map(s=>s.name).join(', ');
+  mc().innerHTML=`
+  <div class="card" style="border-color:rgba(220,38,38,0.3);background:var(--danger-light);">
+    <div class="card-hdr" style="background:var(--danger-light);border-color:rgba(220,38,38,0.2);">
+      <div class="card-title" style="color:var(--danger);">⚠️ ${risk.length} students have not logged in for 5+ days</div>
+      <button class="btn btn-danger btn-sm" onclick="sendReminder()">Send WhatsApp Reminder</button>
+    </div>
+    <div class="card-body">
+      ${risk.map(s=>{
+        var c=courseById(s.course);
+        return `<div class="at-risk-row">
+          <div style="flex:1;">
+            <div class="at-risk-name">${s.name}</div>
+            <div style="display:flex;gap:8px;margin-top:2px;flex-wrap:wrap;">
+              <span class="pill pill-red" style="font-size:10px;">${c.label}</span>
+              <span style="font-size:11px;color:var(--danger);">Last seen: ${lastSeenLabel(s.lastSeen)}</span>
+              <span style="font-size:11px;color:var(--danger);">Progress: ${s.pct}%</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:5px;">
+            <button class="btn btn-outline btn-xs">Email</button>
+            <button class="btn btn-danger btn-xs">WhatsApp</button>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hdr"><div class="card-title">Send Group Reminder</div></div>
+    <div class="card-body">
+      <div class="form-group">
+        <label class="form-label">WhatsApp Message Preview</label>
+        <textarea class="form-input form-textarea" id="reminderMsg" style="min-height:120px;">Dear student,
+
+This is a reminder that the module deadline for Cohort 1 is 13 July 2026. You currently have incomplete modules on the Dale Music Academy platform.
+
+Please log in and continue your studies as soon as possible. The physical examination is scheduled for 19 July 2026 and you must complete all modules to be eligible.
+
+God bless you.
+Dale Music Academy</textarea>
+      </div>
+      <button class="btn btn-amber btn-sm" onclick="sendReminder()">Open WhatsApp with Message</button>
+    </div>
+  </div>`;
+}
+function sendReminder(){
+  var msg=document.getElementById('reminderMsg')?.value||'Please complete your modules before the deadline.';
+  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+}
+
+// ══════════════════════════════════════════════════════
+// COHORT DEADLINE
+// ══════════════════════════════════════════════════════
+function renderDeadline(){
+  var dl=daysLeft();
+  var ready=STUDENTS.filter(examReady).length;
+  var behind=STUDENTS.filter(s=>!examReady(s));
+  mc().innerHTML=`
+  <div class="deadline-banner" style="margin-bottom:20px;">
+    <div class="deadline-banner-icon">📅</div>
+    <div class="deadline-banner-body">
+      <div class="deadline-banner-title">Module Completion Deadline</div>
+      <div class="deadline-banner-sub">13 July 2026 &nbsp;·&nbsp; Physical exam: 19 July 2026 &nbsp;·&nbsp; ${ready}/${STUDENTS.length} students ready</div>
+    </div>
+    <div class="deadline-countdown"><div class="deadline-days">${dl}</div><div class="deadline-days-label">days left</div></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+    <div class="card">
+      <div class="card-hdr"><div class="card-title">Update Deadline</div></div>
+      <div class="card-body">
+        <div class="form-group"><label class="form-label">Module Completion Deadline</label><input class="form-input" type="date" id="dlDate" value="2026-07-13"/></div>
+        <div class="form-group"><label class="form-label">Physical Exam Date</label><input class="form-input" type="date" id="examDate" value="2026-07-19"/></div>
+        <div class="form-group"><label class="form-label">Cohort Name</label><input class="form-input" id="cohortName" value="Cohort 1 — June 2026"/></div>
+        <button class="btn btn-primary btn-sm" onclick="alert('Deadline updated. Students will see the new countdown immediately.')">Save Deadline</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><div class="card-title">Deadline Status</div></div>
+      <div class="card-body">
+        <div style="margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span>Students ready</span><span style="color:var(--ok);font-weight:600;">${ready}</span></div>
+          ${bar(Math.round(ready/STUDENTS.length*100),'var(--ok)')}
+        </div>
+        <div style="margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span>Still in progress</span><span style="color:var(--amber-dark);font-weight:600;">${behind.length}</span></div>
+          ${bar(Math.round(behind.length/STUDENTS.length*100),'var(--amber)')}
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-top:8px;">At current pace, ${Math.round(ready*1.4)} students will be ready by the deadline.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hdr">
+      <div class="card-title">Students Behind Schedule</div>
+      <button class="btn btn-amber btn-sm" onclick="goTab('atrisk')">Send Reminder to All</button>
+    </div>
+    <table class="tbl">
+      <thead><tr><th>Student</th><th>Course</th><th>Progress</th><th>Modules Done</th><th>Last Seen</th></tr></thead>
+      <tbody>
+        ${behind.map(s=>{
+          var c=courseById(s.course);
+          var done=s.m.filter(v=>v===2).length;
+          return `<tr>
+            <td style="font-weight:500;">${s.name}</td>
+            <td><span class="pill pill-blue" style="font-size:10px;">${c.label}</span></td>
+            <td><div style="display:flex;align-items:center;gap:6px;">${bar(s.pct)}<span style="font-size:11px;font-weight:600;">${s.pct}%</span></div></td>
+            <td style="font-size:13px;">${done}/${s.m.length}</td>
+            <td style="font-size:12px;color:${s.lastSeen>=5?'var(--danger)':'var(--muted)'};">${lastSeenLabel(s.lastSeen)}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════════════
+// ANALYTICS
+// ══════════════════════════════════════════════════════
+function renderAnalytics(){
+  mc().innerHTML=`
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-hdr"><div class="card-title">Most Failed Questions</div><span style="font-size:12px;color:var(--muted);">Across all courses and attempts</span></div>
+    <div class="card-body">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6;">Questions failing frequently across students may indicate content that needs clearer explanation in the module reading. Consider revising those sections.</p>
+      ${Object.entries(QUESTIONS).flatMap(([cid,qs])=>qs.map(q=>({...q,cid}))).filter(q=>q.fails>0).sort((a,b)=>b.fails-a.fails).slice(0,8).map(q=>{
+        var c=courseById(q.cid);
+        var maxFails=20;
+        var color=q.fails>=8?'var(--danger)':q.fails>=5?'var(--amber)':'var(--ok)';
+        return `<div class="analytics-bar">
+          <div class="analytics-label"><div style="font-size:10px;color:var(--muted);margin-bottom:2px;">${c.label}</div>${q.q.length>55?q.q.substring(0,53)+'...':q.q}</div>
+          <div class="analytics-track"><div class="analytics-fill" style="width:${Math.round(q.fails/maxFails*100)}%;background:${color};"><span class="analytics-pct">${q.fails}</span></div></div>
+          <div class="analytics-count">${q.fails} fails</div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+    <div class="card">
+      <div class="card-hdr"><div class="card-title">Average Attempts per Module</div></div>
+      <div class="card-body">
+        ${COURSES.flatMap(c=>c.modules.map(m=>({...m,cLabel:c.label,cColor:c.color,stCount:c.students}))).filter(m=>m.attempts>0).map(m=>{
+          var avg=(m.attempts/m.stCount).toFixed(1);
+          var pct=Math.min(100,Math.round(parseFloat(avg)/3*100));
+          return `<div style="margin-bottom:10px;">
+            <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;">
+              <span style="color:var(--text);">${m.cLabel} · ${m.title.substring(0,28)}${m.title.length>28?'...':''}</span>
+              <span style="font-weight:600;color:${parseFloat(avg)>2?'var(--danger)':'var(--muted)'};">${avg} avg</span>
+            </div>
+            ${bar(pct,m.cColor)}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><div class="card-title">Completion Rate by Course</div></div>
+      <div class="card-body">
+        ${COURSES.map(c=>{
+          var sts=courseStudents(c.id);
+          var rd=sts.filter(examReady).length;
+          var pct=Math.round(rd/sts.length*100);
+          return `<div style="margin-bottom:14px;">
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+              <span style="font-weight:500;">${c.title}</span>
+              <span style="font-weight:600;color:var(--ok);">${pct}%</span>
+            </div>
+            ${bar(pct,c.color)}
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">${rd} of ${sts.length} students fully complete</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════════════
+// ANNOUNCEMENTS
+// ══════════════════════════════════════════════════════
+function renderAnnounce(){
+  mc().innerHTML=`
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-hdr"><div class="card-title">Post Announcement</div></div>
+    <div class="card-body">
+      <div class="form-group">
+        <label class="form-label">Message</label>
+        <textarea class="form-input form-textarea" id="newAnnounce" placeholder="This message will appear for all students when they log in..."></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Send to</label>
+          <select class="form-input" id="announceTarget">
+            <option>All Students (all courses)</option>
+            ${COURSES.map(c=>`<option>${c.label} students only</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Priority</label>
+          <select class="form-input" id="announcePriority">
+            <option>Normal</option>
+            <option>Urgent</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="postAnnounce()">Post Announcement</button>
+      <div id="announceMsg" class="msg-ok" style="margin-top:10px;"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hdr"><div class="card-title">Posted Announcements</div></div>
+    <div class="card-body">
+      ${ANNOUNCEMENTS.map((a,i)=>`
+        <div class="announcement-card" style="margin-bottom:10px;">
+          <div class="announcement-meta">Posted ${a.date} · All Students</div>
+          <div class="announcement-text">${a.text}</div>
+          <div style="margin-top:8px;"><button class="btn btn-danger btn-xs" onclick="removeAnnounce(${i})">Remove</button></div>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+function postAnnounce(){
+  var text=document.getElementById('newAnnounce').value.trim();
+  if(!text){alert('Please write a message.');return;}
+  var today=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  ANNOUNCEMENTS.unshift({text,date:today});
+  var msg=document.getElementById('announceMsg');
+  msg.textContent='Announcement posted. All students will see it on next login.';
+  msg.style.display='block';
+  setTimeout(()=>{msg.style.display='none';renderAnnounce();},2500);
+}
+function removeAnnounce(i){
+  if(!confirm('Remove this announcement?'))return;
+  ANNOUNCEMENTS.splice(i,1);renderAnnounce();
+}
+</script>
+</body>
+</html>
