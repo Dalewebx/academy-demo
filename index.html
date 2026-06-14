@@ -683,23 +683,37 @@ function submitQuiz(){
   }
   submitted=true;
   var score=0;
+  // First pass: calculate score without revealing anything
+  shownQuestions.forEach(function(q,qi){
+    if(answers[qi]===q.ans) score++;
+  });
+  var passed=score===shownQuestions.length;
+
+  // Second pass: reveal answers only if passed, otherwise just mark wrong ones red
   shownQuestions.forEach(function(q,qi){
     var chosen=answers[qi];
     q.opts.forEach(function(_,oi){
       var el=document.getElementById('qo-'+qi+'-'+oi);
-      el.classList.add('disabled');
-      if(oi===q.ans) el.classList.add('correct');
-      else if(oi===chosen&&chosen!==q.ans) el.classList.add('wrong');
-      else el.classList.remove('sel');
+      if(passed){
+        // Passed: confirm correct answers in green
+        el.classList.add('disabled');
+        if(oi===q.ans) el.classList.add('correct');
+        else el.classList.remove('sel');
+      } else {
+        // Failed: mark wrong selection red, never reveal the right answer
+        el.classList.add('disabled');
+        if(oi===chosen&&chosen!==q.ans) el.classList.add('wrong');
+        else el.classList.remove('sel');
+      }
     });
-    if(chosen===q.ans) score++;
   });
-  var passed=score===shownQuestions.length;
   var resultEl=document.getElementById('quizResult');
   resultEl.innerHTML='<div class="qr-score">'+score+'/'+shownQuestions.length+'</div>'
     +'<div class="qr-label">Questions correct</div>'
     +'<div class="qr-msg '+(passed?'pass':'fail')+'">'
-    +(passed?'✓ Excellent. You scored 100%. This module is now complete.':'You need to answer every question correctly. Review the reading above and try again.')
+    +(passed
+      ? '✓ Excellent. You scored 100%. This module is now complete.'
+      : 'Your wrong answers are marked above. Go back and read carefully to find the correct information, then try a fresh set of questions.')
     +'</div>';
   resultEl.classList.add('show');
   if(passed&&completed.indexOf(currentMod)===-1) completed.push(currentMod);
@@ -713,14 +727,12 @@ function submitQuiz(){
       : '<button class="btn btn-primary" onclick="openMod('+(currentMod+1)+')">Next Module →</button>'
         +'<button class="btn btn-secondary" onclick="goCourse()">← Back to Course</button>';
   } else {
-    actions.innerHTML='<button class="btn btn-secondary" onclick="retryMod()">↺ Retry Assessment</button>'
-      +'<button class="btn btn-secondary" onclick="goCourse()">← Back to Course</button>';
+    actions.innerHTML='<button class="btn btn-secondary" onclick="retryMod()">↑ Back to reading</button>';
   }
   resultEl.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 function retryMod(){
-  // Re-randomise questions on retry: different 3 from the pool of 6
   var m=MODULES[currentMod];
   var pool=m.pool.slice();
   shownQuestions=[];
@@ -729,12 +741,18 @@ function retryMod(){
     shownQuestions.push(pool.splice(idx,1)[0]);
   }
   answers={};submitted=false;
-  renderQuiz();
+  // Hide quiz again — student must scroll back through reading
+  document.getElementById('quizCard').style.display='none';
   document.getElementById('quizResult').innerHTML='';
   document.getElementById('quizResult').classList.remove('show');
-  document.getElementById('modActions').innerHTML=
-    '<button class="btn btn-primary" id="submitBtn" onclick="submitQuiz()">Submit Assessment →</button>';
-  document.getElementById('quizCard').scrollIntoView({behavior:'smooth',block:'start'});
+  document.getElementById('modActions').innerHTML='';
+  // Restart the reading timer
+  timerDone=false;scrollDone=false;
+  if(timerInterval) clearInterval(timerInterval);
+  startReadTimer();
+  setupScrollCheck();
+  // Scroll back to top of reading
+  document.getElementById('modContent').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 function showComplete(){
