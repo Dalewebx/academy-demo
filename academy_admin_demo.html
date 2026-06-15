@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Dale Music Academy — Admin v2</title>
+<title>Catholic Music Academy — Admin v2</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -247,6 +247,28 @@ body{background:var(--surface);color:var(--text);font-family:'DM Sans',sans-seri
 .pub-switch-dot{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:white;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.2);}
 .pub-switch.on .pub-switch-dot{left:21px;}
 
+/* STUDENT DETAIL MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal-card{background:var(--white);border-radius:16px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.25);}
+.modal-hdr{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;background:var(--white);}
+.modal-title{font-family:'DM Serif Display',serif;font-size:18px;color:var(--text);}
+.modal-close{background:none;border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--muted);}
+.modal-close:hover{border-color:var(--danger);color:var(--danger);}
+.modal-body{padding:24px;}
+.detail-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.detail-row:last-child{border-bottom:none;}
+.detail-label{color:var(--muted);font-weight:500;}
+.detail-value{color:var(--text);font-weight:600;text-align:right;}
+.test-badge{display:inline-flex;align-items:center;gap:4px;background:#EDE9FE;border:1px solid #C4B5FD;border-radius:6px;padding:2px 8px;font-size:10px;font-weight:700;color:#6D28D9;letter-spacing:0.5px;}
+/* HEATMAP */
+.heatmap-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.heatmap-label{font-size:12px;color:var(--text);width:200px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.heatmap-track{flex:1;height:20px;background:var(--border);border-radius:4px;overflow:hidden;position:relative;}
+.heatmap-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:8px;transition:width 0.6s ease;}
+.heatmap-pct{font-size:11px;color:white;font-weight:700;}
+.heatmap-num{font-size:11px;color:var(--muted);width:60px;text-align:right;flex-shrink:0;}
+
+@media(max-width:860px){.cm-layout{grid-template-columns:1fr;}.cm-sidebar{position:static;}}
 @media(max-width:860px){.cm-layout{grid-template-columns:1fr;}.cm-sidebar{position:static;}}
 @media(max-width:720px){
   .sidebar{display:none;}.main{margin-left:0;}
@@ -264,7 +286,7 @@ body{background:var(--surface);color:var(--text);font-family:'DM Sans',sans-seri
   <div class="login-wrap">
     <div class="login-card">
       <div class="login-badge">⚙ Admin Portal · v2</div>
-      <div class="login-title">Dale Music Academy</div>
+      <div class="login-title">Catholic Music Academy</div>
       <div class="login-sub">Sign in to manage courses, students, and progress.</div>
       <label class="field-label">Username</label>
       <input class="field-input" id="loginUser" type="text" placeholder="Username: dale" autocomplete="username"/>
@@ -284,7 +306,7 @@ body{background:var(--surface);color:var(--text);font-family:'DM Sans',sans-seri
     <div class="sidebar">
       <div class="sidebar-brand">
         <div class="brand-icon">♪</div>
-        <div class="brand-name">Dale Music Academy</div>
+        <div class="brand-name">Catholic Music Academy</div>
         <div class="brand-sub">Admin Portal</div>
       </div>
       <nav class="sidebar-nav">
@@ -301,6 +323,7 @@ body{background:var(--surface);color:var(--text);font-family:'DM Sans',sans-seri
         <div class="nav-label">Tools</div>
         <div class="nav-item" onclick="goTab('deadline')" id="nav-deadline"><span class="nav-icon">📅</span>Cohort Deadline</div>
         <div class="nav-item" onclick="goTab('analytics')" id="nav-analytics"><span class="nav-icon">🔬</span>Assessment Analytics</div>
+        <div class="nav-item" onclick="goTab('reports')" id="nav-reports"><span class="nav-icon">📋</span>Reports</div>
         <div class="nav-item" onclick="goTab('announce')" id="nav-announce"><span class="nav-icon">📢</span>Announcements</div>
       </nav>
       <div class="sidebar-footer">
@@ -388,6 +411,9 @@ var STUDENTS=[
   {name:'Emeka Ugwu',      email:'emeka.ugwu@gmail.com',       course:'c3', m:[2,1,0,0,0], pct:40, lastSeen:5},
   {name:'Ifeoma Nze',      email:'ifeoma.nze@gmail.com',       course:'c3', m:[2,2,2,1,0], pct:80, lastSeen:1},
   {name:'Chukwuemeka Odo', email:'chukwuemeka.o@gmail.com',   course:'c3', m:[2,2,2,2,0], pct:80, lastSeen:0},
+  // Test students for system verification
+  {name:'Dale Demo',        email:'dale@demo.com',              course:'c1', m:[2,1,0], pct:44, lastSeen:0, isTest:true},
+  {name:'Anonymous Demo',   email:'anonymous@demo.com',         course:'c1', m:[0,0,0], pct:0,  lastSeen:0, isTest:true},
 ];
 // m values: 0=not started, 1=in progress, 2=done
 
@@ -442,8 +468,8 @@ function logout(){
 // ══════════════════════════════════════════════════════
 // TAB ROUTING
 // ══════════════════════════════════════════════════════
-var TABS=['dashboard','content','courses','questions','students','progress','atrisk','deadline','analytics','announce'];
-var TITLES={dashboard:'Dashboard',content:'Content Manager',courses:'Courses & Modules',questions:'Question Bank',students:'All Students',progress:'Progress Records',atrisk:'At-Risk Students',deadline:'Cohort Deadline',analytics:'Assessment Analytics',announce:'Announcements'};
+var TABS=['dashboard','content','courses','questions','students','progress','atrisk','deadline','analytics','reports','announce'];
+var TITLES={dashboard:'Dashboard',content:'Content Manager',courses:'Courses & Modules',questions:'Question Bank',students:'All Students',progress:'Progress Records',atrisk:'At-Risk Students',deadline:'Cohort Deadline',analytics:'Assessment Analytics',reports:'Reports',announce:'Announcements'};
 
 function goTab(tab){
   TABS.forEach(t=>{
@@ -451,7 +477,7 @@ function goTab(tab){
     if(n) n.classList.toggle('active',t===tab);
   });
   document.getElementById('topbarTitle').textContent=TITLES[tab]||tab;
-  var renders={dashboard:renderDashboard,content:renderContent,courses:renderCourses,questions:renderQuestions,students:renderStudents,progress:renderProgress,atrisk:renderAtRisk,deadline:renderDeadline,analytics:renderAnalytics,announce:renderAnnounce};
+  var renders={dashboard:renderDashboard,content:renderContent,courses:renderCourses,questions:renderQuestions,students:renderStudents,progress:renderProgress,atrisk:renderAtRisk,deadline:renderDeadline,analytics:renderAnalytics,reports:renderReports,announce:renderAnnounce};
   if(renders[tab]) renders[tab]();
 }
 
@@ -489,7 +515,110 @@ function renderDashboard(){
   var total=STUDENTS.length;
   var ready=STUDENTS.filter(examReady).length;
   var atRisk=STUDENTS.filter(s=>s.lastSeen>=5).length;
+  var behind=STUDENTS.filter(s=>!examReady(s)&&s.pct<50).length;
   var dl=daysLeft();
+  var newThisWeek=STUDENTS.filter(s=>s.lastSeen<=7).length;
+  mc().innerHTML=`
+  <div class="deadline-banner">
+    <div class="deadline-banner-icon">📅</div>
+    <div class="deadline-banner-body">
+      <div class="deadline-banner-title">Cohort 1 Module Deadline</div>
+      <div class="deadline-banner-sub">All students must complete their modules by <strong style="color:white;">13 July 2026</strong> to sit the physical examination on 19 July 2026.</div>
+    </div>
+    <div class="deadline-countdown">
+      <div class="deadline-days">${dl}</div>
+      <div class="deadline-days-label">days left</div>
+    </div>
+  </div>
+
+  <!-- SCALE STATS -->
+  <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Academy Overview</div>
+  <div class="stat-grid" style="margin-bottom:12px;">
+    <div class="stat s-blue"><div class="stat-num">${total}</div><div class="stat-label">Total Students</div><div class="stat-sub">Across ${COURSES.length} courses</div></div>
+    <div class="stat s-green"><div class="stat-num">${ready}</div><div class="stat-label">Exam Ready</div><div class="stat-sub">All modules done</div></div>
+    <div class="stat s-purple"><div class="stat-num">${COURSES.length}</div><div class="stat-label">Courses</div><div class="stat-sub">${COURSES.reduce((a,c)=>a+c.modules.length,0)} modules total</div></div>
+    <div class="stat s-amber"><div class="stat-num">${Math.round(ready/total*100)}%</div><div class="stat-label">Completion Rate</div><div class="stat-sub">Exam-ready students</div></div>
+  </div>
+
+  <!-- URGENCY STATS -->
+  <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Today's Attention</div>
+  <div class="stat-grid" style="margin-bottom:20px;">
+    <div class="stat s-red" style="cursor:pointer;" onclick="goTab('atrisk')"><div class="stat-num">${atRisk}</div><div class="stat-label">At Risk</div><div class="stat-sub">No activity 5+ days</div></div>
+    <div class="stat s-amber" style="cursor:pointer;" onclick="goTab('deadline')"><div class="stat-num">${behind}</div><div class="stat-label">Behind Schedule</div><div class="stat-sub">Below 50% progress</div></div>
+    <div class="stat s-blue"><div class="stat-num">${newThisWeek}</div><div class="stat-label">Active This Week</div><div class="stat-sub">Logged in recently</div></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+    <!-- STUDENT PROGRESS TABLE -->
+    <div class="card">
+      <div class="card-hdr">
+        <div class="card-title">Student Progress</div>
+        <button class="btn btn-outline btn-sm" onclick="goTab('progress')">View all →</button>
+      </div>
+      <table class="tbl">
+        <thead><tr><th>Student</th><th>Programme</th><th>Progress</th><th>Status</th></tr></thead>
+        <tbody>
+          ${STUDENTS.slice(0,8).map(s=>{
+            var c=courseById(s.course);
+            var status=examReady(s)?'<span class="pill pill-green">Completed</span>':s.pct>=50?'<span class="pill pill-blue">On Track</span>':'<span class="pill pill-red">Behind</span>';
+            var testMark=s.isTest?'<span class="test-badge">TEST</span> ':'';
+            return `<tr style="cursor:pointer;" onclick="showStudentDetail(${STUDENTS.indexOf(s)})">
+              <td><div style="font-weight:500;">${testMark}${s.name}</div></td>
+              <td style="font-size:11px;color:var(--muted);">${c.title.split(' ').slice(0,3).join(' ')}</td>
+              <td><div style="display:flex;align-items:center;gap:5px;">${bar(s.pct)}<span style="font-size:10px;color:var(--muted);">${s.pct}%</span></div></td>
+              <td>${status}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- LEARNING HEATMAP -->
+    <div class="card">
+      <div class="card-hdr"><div class="card-title">Learning Heatmap</div><span style="font-size:11px;color:var(--muted);">Module completion across all students</span></div>
+      <div class="card-body">
+        <p style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.5;">Where completion drops sharply indicates content that may need revision or additional support.</p>
+        ${COURSES.flatMap(c=>{
+          var sts=courseStudents(c.id);
+          return c.modules.map((m,i)=>{
+            var pct=sts.length?Math.round(m.completions/sts.length*100):0;
+            var color=pct>=70?'var(--ok)':pct>=40?'var(--amber)':'var(--danger)';
+            return `<div class="heatmap-row">
+              <div class="heatmap-label" title="${c.label}: ${m.title}">${c.label} · M${i+1}</div>
+              <div class="heatmap-track">
+                <div class="heatmap-fill" style="width:${pct}%;background:${color};">
+                  ${pct>15?`<span class="heatmap-pct">${pct}%</span>`:''}
+                </div>
+              </div>
+              <div class="heatmap-num">${m.completions}/${sts.length}</div>
+            </div>`;
+          });
+        }).join('')}
+      </div>
+    </div>
+  </div>
+
+  <!-- AT-RISK WIDGET -->
+  <div class="card" style="border-color:rgba(220,38,38,0.2);">
+    <div class="card-hdr" style="background:var(--danger-light);">
+      <div class="card-title" style="color:var(--danger);">⚠️ Students Requiring Attention</div>
+      <button class="btn btn-danger btn-sm" onclick="goTab('atrisk')">View All →</button>
+    </div>
+    <div class="card-body" style="padding:14px 18px;">
+      ${STUDENTS.filter(s=>s.lastSeen>=5||s.pct<20).slice(0,4).map(s=>`
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
+          <div>
+            <div style="font-size:13px;font-weight:500;color:var(--text);">${s.name}</div>
+            <div style="font-size:11px;color:var(--danger);margin-top:2px;">
+              ${s.lastSeen>=5?'Inactive for '+s.lastSeen+' days':''} 
+              ${s.pct<20&&s.lastSeen<5?'Progress critically low ('+s.pct+'%)':''}
+            </div>
+          </div>
+          <button class="btn btn-danger btn-xs" onclick="window.open('https://wa.me/?text='+encodeURIComponent('Dear ${s.name}, please log in to continue your studies.'),'_blank')">WhatsApp</button>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
   mc().innerHTML=`
   <div class="deadline-banner">
     <div class="deadline-banner-icon">📅</div>
@@ -1114,14 +1243,68 @@ function removeQ(id,i){
 }
 
 // ══════════════════════════════════════════════════════
+// STUDENT DETAIL MODAL
+// ══════════════════════════════════════════════════════
+function showStudentDetail(idx){
+  var s=STUDENTS[idx];
+  var c=courseById(s.course);
+  var done=s.m.filter(v=>v===2).length;
+  var avgScore=s.pct>0?Math.round(s.pct*1.1):0;
+  var modal=document.createElement('div');
+  modal.className='modal-overlay';
+  modal.innerHTML=`<div class="modal-card">
+    <div class="modal-hdr">
+      <div>
+        <div class="modal-title">${s.name}${s.isTest?' <span class="test-badge">TEST ACCOUNT</span>':''}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">${s.email}</div>
+      </div>
+      <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">✕ Close</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:var(--blue-pale);border-radius:10px;padding:16px;margin-bottom:18px;">
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px;">
+          <span style="color:var(--blue);font-weight:600;">Course Progress</span>
+          <span style="color:var(--blue);font-weight:700;">${s.pct}%</span>
+        </div>
+        ${bar(s.pct,'var(--blue)')}
+      </div>
+      <div class="detail-row"><span class="detail-label">Programme</span><span class="detail-value">${c.title}</span></div>
+      <div class="detail-row"><span class="detail-label">Enrolment</span><span class="detail-value">${c.label}</span></div>
+      <div class="detail-row"><span class="detail-label">Last Login</span><span class="detail-value" style="color:${s.lastSeen>=5?'var(--danger)':'var(--text)'};">${lastSeenLabel(s.lastSeen)}</span></div>
+      <div class="detail-row"><span class="detail-label">Completed Modules</span><span class="detail-value">${done} of ${s.m.length}</span></div>
+      <div class="detail-row"><span class="detail-label">Remaining Modules</span><span class="detail-value">${s.m.length-done}</span></div>
+      <div class="detail-row"><span class="detail-label">Exam Eligibility</span><span class="detail-value">${examReady(s)?'<span class="pill pill-green">Ready</span>':'<span class="pill pill-gray">Not yet ready</span>'}</span></div>
+      <div style="margin-top:16px;">
+        <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Module Breakdown</div>
+        ${s.m.map((v,i)=>{
+          var mod=c.modules[i];
+          return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
+            <div style="width:24px;height:24px;border-radius:6px;background:${v===2?'var(--ok)':v===1?'var(--amber)':'var(--border)'};display:flex;align-items:center;justify-content:center;font-size:11px;color:white;font-weight:700;flex-shrink:0;">${v===2?'✓':v===1?'…':i+1}</div>
+            <div style="flex:1;font-size:13px;">${mod?mod.title:'Module '+(i+1)}</div>
+            <span class="pill ${v===2?'pill-green':v===1?'pill-amber':'pill-gray'}">${v===2?'Done':v===1?'In Progress':'Not Started'}</span>
+          </div>`;
+        }).join('')}
+      </div>
+      <div style="display:flex;gap:8px;margin-top:18px;">
+        <button class="btn btn-primary btn-sm" onclick="window.open('https://wa.me/'+encodeURIComponent('${s.email}'),'_blank')">WhatsApp</button>
+        <button class="btn btn-outline btn-sm" onclick="unlockModule(${idx});this.closest('.modal-overlay').remove()">Unlock Next Module</button>
+        <button class="btn btn-danger btn-xs" onclick="if(confirm('Remove ${s.name}?')){STUDENTS.splice(${idx},1);this.closest('.modal-overlay').remove();renderStudents();}">Remove</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
+}
+
+// ══════════════════════════════════════════════════════
 // STUDENTS
 // ══════════════════════════════════════════════════════
 function renderStudents(){
   mc().innerHTML=`
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
-    <span style="font-size:13px;color:var(--muted);">${STUDENTS.length} students across 3 courses</span>
+    <span style="font-size:13px;color:var(--muted);">${STUDENTS.length} students across ${COURSES.length} courses</span>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      <input style="border:1.5px solid var(--border);border-radius:8px;padding:7px 12px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;width:200px;" placeholder="Search..." oninput="filterSt(this.value)" id="stSearch"/>
+      <input style="border:1.5px solid var(--border);border-radius:8px;padding:7px 12px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;width:200px;" placeholder="Search by name or email..." oninput="filterSt(this.value)" id="stSearch"/>
       <button class="btn btn-primary btn-sm" onclick="toggleAddSt()">+ Add Student</button>
     </div>
   </div>
@@ -1142,7 +1325,7 @@ function renderStudents(){
   </div>
   <div class="card">
     <div class="card-hdr"><div class="card-title">All Students</div><button class="btn btn-outline btn-sm">Export CSV</button></div>
-    <table class="tbl" id="stTable">
+    <table class="tbl">
       <thead><tr><th>Name</th><th>Email</th><th>Course</th><th>Progress</th><th>Last Seen</th><th>Status</th><th></th></tr></thead>
       <tbody id="stBody"></tbody>
     </table>
@@ -1150,16 +1333,21 @@ function renderStudents(){
   renderStRows(STUDENTS);
 }
 function renderStRows(list){
-  document.getElementById('stBody').innerHTML=list.map((s,i)=>{
+  document.getElementById('stBody').innerHTML=list.map((s)=>{
     var c=courseById(s.course);
-    return `<tr>
-      <td><div style="font-weight:500;">${s.name}</div></td>
+    var idx=STUDENTS.indexOf(s);
+    var testMark=s.isTest?'<span class="test-badge" style="margin-right:4px;">TEST</span>':'';
+    return `<tr style="cursor:pointer;" onclick="showStudentDetail(${idx})">
+      <td><div style="font-weight:500;">${testMark}${s.name}</div></td>
       <td style="color:var(--muted);font-size:12px;">${s.email}</td>
       <td><span class="pill pill-blue" style="font-size:10px;">${c.label}</span></td>
       <td><div style="display:flex;align-items:center;gap:6px;">${bar(s.pct)}<span style="font-size:11px;color:var(--muted);white-space:nowrap;">${s.pct}%</span></div></td>
       <td style="font-size:12px;color:${s.lastSeen>=5?'var(--danger)':'var(--muted)'};">${lastSeenLabel(s.lastSeen)}</td>
       <td>${examReady(s)?'<span class="pill pill-green">Exam Ready</span>':'<span class="pill pill-amber">In Progress</span>'}</td>
-      <td><div style="display:flex;gap:5px;"><button class="btn btn-outline btn-xs" onclick="unlockModule(${STUDENTS.indexOf(s)})">Unlock Module</button><button class="btn btn-danger btn-xs">Remove</button></div></td>
+      <td><div style="display:flex;gap:5px;" onclick="event.stopPropagation()">
+        <button class="btn btn-outline btn-xs" onclick="showStudentDetail(${idx})">View</button>
+        <button class="btn btn-danger btn-xs" onclick="if(confirm('Remove?')){STUDENTS.splice(${idx},1);renderStudents();}">Remove</button>
+      </div></td>
     </tr>`;
   }).join('');
 }
@@ -1186,9 +1374,109 @@ function unlockModule(i){
   if(confirm('Manually unlock Module '+(locked+1)+' for '+s.name+'? Only do this for genuine technical issues.')){
     s.m[locked]=1;
     s.pct=Math.round(s.m.filter(v=>v===2).length/s.m.length*100);
-    renderStRows(STUDENTS);
+    renderStudents();
     alert('Module '+(locked+1)+' unlocked for '+s.name+'.');
   }
+}
+function renderReports(){
+  var total=STUDENTS.length;
+  var ready=STUDENTS.filter(examReady).length;
+  // Most active course
+  var mostActive=COURSES.slice().sort((a,b)=>courseStudents(b.id).filter(s=>s.lastSeen<=3).length-courseStudents(a.id).filter(s=>s.lastSeen<=3).length)[0];
+  // Top performers
+  var topStudents=STUDENTS.slice().sort((a,b)=>b.pct-a.pct).slice(0,5);
+  // Monthly enrollment (simulated)
+  var months=['Jan','Feb','Mar','Apr','May','Jun'];
+  var enrollments=[8,12,15,18,22,total];
+
+  mc().innerHTML=`
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+    <div class="card">
+      <div class="card-hdr"><div class="card-title">Most Active Course</div></div>
+      <div class="card-body">
+        <div style="text-align:center;padding:16px 0;">
+          <div style="font-family:'DM Serif Display',serif;font-size:22px;color:var(--blue);margin-bottom:6px;">${mostActive.title}</div>
+          <div style="font-size:13px;color:var(--muted);">${courseStudents(mostActive.id).filter(s=>s.lastSeen<=3).length} students active in the last 3 days</div>
+          <span class="pill pill-blue" style="margin-top:10px;display:inline-flex;">${mostActive.label}</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><div class="card-title">Completion Statistics</div></div>
+      <div class="card-body">
+        <div class="detail-row"><span class="detail-label">Total Enrolled</span><span class="detail-value">${total}</span></div>
+        <div class="detail-row"><span class="detail-label">Exam Ready</span><span class="detail-value" style="color:var(--ok);">${ready}</span></div>
+        <div class="detail-row"><span class="detail-label">Still In Progress</span><span class="detail-value" style="color:var(--amber-dark);">${total-ready}</span></div>
+        <div class="detail-row"><span class="detail-label">Overall Completion Rate</span><span class="detail-value">${Math.round(ready/total*100)}%</span></div>
+        <div class="detail-row"><span class="detail-label">At-Risk Students</span><span class="detail-value" style="color:var(--danger);">${STUDENTS.filter(s=>s.lastSeen>=5).length}</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-hdr"><div class="card-title">Highest Performing Students</div></div>
+    <table class="tbl">
+      <thead><tr><th>Rank</th><th>Student</th><th>Course</th><th>Progress</th><th>Status</th></tr></thead>
+      <tbody>
+        ${topStudents.map((s,i)=>{
+          var c=courseById(s.course);
+          var medal=['🥇','🥈','🥉','4','5'][i];
+          return `<tr style="cursor:pointer;" onclick="showStudentDetail(${STUDENTS.indexOf(s)})">
+            <td style="font-size:18px;text-align:center;">${medal}</td>
+            <td><div style="font-weight:500;">${s.isTest?'<span class="test-badge" style="margin-right:4px;">TEST</span>':''}${s.name}</div></td>
+            <td><span class="pill pill-blue" style="font-size:10px;">${c.label}</span></td>
+            <td><div style="display:flex;align-items:center;gap:6px;">${bar(s.pct)}<span style="font-size:11px;font-weight:600;">${s.pct}%</span></div></td>
+            <td>${examReady(s)?'<span class="pill pill-green">Exam Ready</span>':'<span class="pill pill-amber">In Progress</span>'}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+    <div class="card">
+      <div class="card-hdr"><div class="card-title">Enrolment by Course</div></div>
+      <div class="card-body">
+        ${COURSES.map(c=>{
+          var sts=courseStudents(c.id);
+          var pct=Math.round(sts.length/total*100);
+          return `<div style="margin-bottom:12px;">
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+              <span style="font-weight:500;">${c.title}</span>
+              <span style="color:var(--blue);font-weight:600;">${sts.length} students</span>
+            </div>
+            ${bar(pct,c.color)}
+            <div style="font-size:10px;color:var(--muted);margin-top:2px;">${pct}% of total enrolment</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr">
+        <div class="card-title">Assessment Performance</div>
+      </div>
+      <div class="card-body">
+        ${COURSES.map(c=>{
+          var sts=courseStudents(c.id);
+          var rd=sts.filter(examReady).length;
+          var pct=sts.length?Math.round(rd/sts.length*100):0;
+          var totalAttempts=c.modules.reduce((a,m)=>a+m.attempts,0);
+          var totalCompletions=c.modules.reduce((a,m)=>a+m.completions,0);
+          return `<div style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border);">
+            <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px;">${c.title}</div>
+            <div style="display:flex;gap:16px;font-size:11px;color:var(--muted);">
+              <span>Pass rate: <strong style="color:var(--ok);">${pct}%</strong></span>
+              <span>Attempts: <strong>${totalAttempts}</strong></span>
+              <span>Completions: <strong>${totalCompletions}</strong></span>
+            </div>
+          </div>`;
+        }).join('')}
+        <div style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);text-align:center;">
+          <button class="btn btn-outline btn-sm">Export to Excel</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
 }
 
 // ══════════════════════════════════════════════════════
@@ -1282,12 +1570,12 @@ function renderAtRisk(){
         <label class="form-label">WhatsApp Message Preview</label>
         <textarea class="form-input form-textarea" id="reminderMsg" style="min-height:120px;">Dear student,
 
-This is a reminder that the module deadline for Cohort 1 is 13 July 2026. You currently have incomplete modules on the Dale Music Academy platform.
+This is a reminder that the module deadline for Cohort 1 is 13 July 2026. You currently have incomplete modules on the Catholic Music Academy platform.
 
 Please log in and continue your studies as soon as possible. The physical examination is scheduled for 19 July 2026 and you must complete all modules to be eligible.
 
 God bless you.
-Dale Music Academy</textarea>
+Catholic Music Academy</textarea>
       </div>
       <button class="btn btn-amber btn-sm" onclick="sendReminder()">Open WhatsApp with Message</button>
     </div>
