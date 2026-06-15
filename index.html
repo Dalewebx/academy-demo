@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
 <title>Catholic Music Academy · Online Learning Platform</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet"/>
 <style>
@@ -22,14 +22,15 @@ body{background:var(--white);color:var(--text);font-family:'DM Sans',sans-serif;
 
 /* TOPBAR */
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:64px;border-bottom:1px solid var(--border);background:var(--white);position:sticky;top:0;z-index:200;gap:16px;}
-.brand{display:flex;align-items:center;gap:10px;cursor:pointer;text-decoration:none;}
+.brand{display:flex;align-items:center;gap:10px;cursor:pointer;text-decoration:none;min-width:0;flex:1;}
 .brand-icon{width:36px;height:36px;background:var(--blue);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--white);flex-shrink:0;}
-.brand-name{font-family:'DM Serif Display',serif;font-size:17px;color:var(--blue);line-height:1;}
-.brand-sub{font-size:10px;color:var(--muted);letter-spacing:0.5px;margin-top:1px;}
-.topbar-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
-.chip{display:inline-flex;align-items:center;gap:6px;background:var(--blue-light);border-radius:20px;padding:6px 14px;font-size:12px;color:var(--blue);font-weight:500;}
-.chip-dot{width:7px;height:7px;border-radius:50%;background:var(--ok);}
-.btn-logout{background:none;border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-size:12px;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
+.brand-text{min-width:0;overflow:hidden;}
+.brand-name{font-family:'DM Serif Display',serif;font-size:17px;color:var(--blue);line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.brand-sub{font-size:10px;color:var(--muted);letter-spacing:0.5px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.topbar-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--blue-light);border-radius:20px;padding:6px 14px;font-size:12px;color:var(--blue);font-weight:500;white-space:nowrap;}
+.chip-dot{width:7px;height:7px;border-radius:50%;background:var(--ok);flex-shrink:0;}
+.btn-logout{background:none;border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-size:12px;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;white-space:nowrap;}
 .btn-logout:hover{border-color:var(--danger);color:var(--danger);}
 
 /* BUTTONS */
@@ -181,13 +182,31 @@ body{background:var(--white);color:var(--text);font-family:'DM Sans',sans-serif;
 .other-course-desc{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:12px;}
 .other-course-tag{display:inline-flex;align-items:center;gap:4px;background:var(--blue-light);border-radius:6px;padding:3px 10px;font-size:11px;color:var(--blue);font-weight:500;}
 
+/* ══ MOBILE ══ */
 @media(min-width:768px){.login-left{display:flex;}.login-right{flex:0 0 480px;}}
+
 @media(max-width:600px){
-  .topbar{padding:0 18px;}
+  /* Topbar: shrink on small screens */
+  .topbar{padding:0 14px;height:auto;min-height:56px;flex-wrap:nowrap;gap:8px;}
+  .brand-name{font-size:13px;}
+  .brand-sub{font-size:9px;}
+  .brand-icon{width:30px;height:30px;font-size:15px;border-radius:7px;}
+  /* Hide the subtitle on very small screens to prevent overflow */
+  .chip{padding:5px 10px;font-size:11px;}
+  .btn-logout{padding:5px 10px;font-size:11px;}
+
   .dash-header,.dash-body,.course-header,.modules-wrap,.module-page,.complete-wrap{padding-left:18px;padding-right:18px;}
   .course-h1,.module-h1{font-size:26px;}
   .dash-name{font-size:28px;}
   .course-header-top{flex-direction:column;}
+}
+
+/* Extra small — e.g. iPhone SE */
+@media(max-width:380px){
+  .brand-sub{display:none;}
+  .brand-name{font-size:12px;}
+  .chip span{display:none;}
+  .btn-logout{display:none;}
 }
 </style>
 </head>
@@ -197,7 +216,7 @@ body{background:var(--white);color:var(--text);font-family:'DM Sans',sans-serif;
 <div class="topbar" id="topbar" style="display:none;">
   <div class="brand" onclick="goDash()">
     <div class="brand-icon">♪</div>
-    <div>
+    <div class="brand-text">
       <div class="brand-name">Catholic Music Academy</div>
       <div class="brand-sub">Online Learning Platform</div>
     </div>
@@ -214,8 +233,8 @@ body{background:var(--white);color:var(--text);font-family:'DM Sans',sans-serif;
     <div class="login-left">
       <div style="color:white;">
         <div style="font-size:13px;letter-spacing:2px;text-transform:uppercase;opacity:0.6;margin-bottom:20px;">Catholic Music Academy</div>
-        <div style="font-family:'DM Serif Display',serif;font-size:42px;line-height:1.15;margin-bottom:16px;">Sacred Music.<br><em>Professional</em><br>Learning.</div>
-        <div style="font-size:15px;opacity:0.65;line-height:1.7;">Online courses in music theory, liturgical theology, choral leadership, composition, and more, for the Catholic choir member ready to grow.</div>
+        <div style="font-family:'DM Serif Display',serif;font-size:42px;line-height:1.1;margin-bottom:16px;">Sacred Music.<br>Professional Learning.</div>
+        <div style="font-size:15px;opacity:0.65;line-height:1.7;">Comprehensive music education in theory, composition, performance, choral leadership, liturgical studies, and professional musicianship.</div>
       </div>
     </div>
     <div class="login-right">
@@ -503,7 +522,6 @@ function goCourse(){
   showScreen('screen-course');
 }
 
-// Back button — restores correct screen
 window.addEventListener('popstate',function(e){
   if(!e.state) return;
   var s=e.state.screen;
@@ -568,8 +586,7 @@ function renderCourse(){
 }
 
 // ── MODULE SCREEN ─────────────────────────────────────────────────────
-var READ_TIME=90; // seconds
-
+var READ_TIME=90;
 
 function openMod(i){
   history.pushState({screen:'module',mod:i},'','#module-'+(i+1));
@@ -622,7 +639,6 @@ function setupScrollCheck(){
     var content=document.getElementById('modContent');
     if(!content) return;
     var rect=content.getBoundingClientRect();
-    // Unlocks when user has scrolled past the bottom of the content
     if(rect.bottom<=window.innerHeight+60){
       scrollDone=true;
       window.removeEventListener('scroll',onScroll);
@@ -630,7 +646,6 @@ function setupScrollCheck(){
     }
   }
   window.addEventListener('scroll',onScroll);
-  // Also check immediately (short content on desktop)
   setTimeout(onScroll,500);
 }
 
@@ -670,24 +685,20 @@ function submitQuiz(){
   }
   submitted=true;
   var score=0;
-  // First pass: calculate score without revealing anything
   shownQuestions.forEach(function(q,qi){
     if(answers[qi]===q.ans) score++;
   });
   var passed=score===shownQuestions.length;
 
-  // Second pass: reveal answers only if passed, otherwise just mark wrong ones red
   shownQuestions.forEach(function(q,qi){
     var chosen=answers[qi];
     q.opts.forEach(function(_,oi){
       var el=document.getElementById('qo-'+qi+'-'+oi);
       if(passed){
-        // Passed: confirm correct answers in green
         el.classList.add('disabled');
         if(oi===q.ans) el.classList.add('correct');
         else el.classList.remove('sel');
       } else {
-        // Failed: mark wrong selection red, never reveal the right answer
         el.classList.add('disabled');
         if(oi===chosen&&chosen!==q.ans) el.classList.add('wrong');
         else el.classList.remove('sel');
@@ -728,17 +739,14 @@ function retryMod(){
     shownQuestions.push(pool.splice(idx,1)[0]);
   }
   answers={};submitted=false;
-  // Hide quiz again — student must scroll back through reading
   document.getElementById('quizCard').style.display='none';
   document.getElementById('quizResult').innerHTML='';
   document.getElementById('quizResult').classList.remove('show');
   document.getElementById('modActions').innerHTML='';
-  // Restart the reading timer
   timerDone=false;scrollDone=false;
   if(timerInterval) clearInterval(timerInterval);
   startReadTimer();
   setupScrollCheck();
-  // Scroll back to top of reading
   document.getElementById('modContent').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
@@ -748,10 +756,7 @@ function showComplete(){
   showScreen('screen-complete');
 }
 
-// ── INITIAL LOAD — read hash on page open ─────────────────────────
 (function(){
-  var hash=window.location.hash.replace('#','');
-  // On fresh load always start at login — hash routing only works after login
   showScreen('screen-login');
 })();
 </script>
