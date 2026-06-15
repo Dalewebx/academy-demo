@@ -531,7 +531,6 @@ function renderDashboard(){
     </div>
   </div>
 
-  <!-- SCALE STATS -->
   <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Academy Overview</div>
   <div class="stat-grid" style="margin-bottom:12px;">
     <div class="stat s-blue"><div class="stat-num">${total}</div><div class="stat-label">Total Students</div><div class="stat-sub">Across ${COURSES.length} courses</div></div>
@@ -540,7 +539,6 @@ function renderDashboard(){
     <div class="stat s-amber"><div class="stat-num">${Math.round(ready/total*100)}%</div><div class="stat-label">Completion Rate</div><div class="stat-sub">Exam-ready students</div></div>
   </div>
 
-  <!-- URGENCY STATS -->
   <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Today's Attention</div>
   <div class="stat-grid" style="margin-bottom:20px;">
     <div class="stat s-red" style="cursor:pointer;" onclick="goTab('atrisk')"><div class="stat-num">${atRisk}</div><div class="stat-label">At Risk</div><div class="stat-sub">No activity 5+ days</div></div>
@@ -549,7 +547,6 @@ function renderDashboard(){
   </div>
 
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
-    <!-- STUDENT PROGRESS TABLE -->
     <div class="card">
       <div class="card-hdr">
         <div class="card-title">Student Progress</div>
@@ -573,11 +570,10 @@ function renderDashboard(){
       </table>
     </div>
 
-    <!-- LEARNING HEATMAP -->
     <div class="card">
-      <div class="card-hdr"><div class="card-title">Learning Heatmap</div><span style="font-size:11px;color:var(--muted);">Module completion across all students</span></div>
+      <div class="card-hdr"><div class="card-title">Learning Heatmap</div><span style="font-size:11px;color:var(--muted);">Module completion rates</span></div>
       <div class="card-body">
-        <p style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.5;">Where completion drops sharply indicates content that may need revision or additional support.</p>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.5;">Drop-off points indicate where content may need revision or additional support.</p>
         ${COURSES.flatMap(c=>{
           var sts=courseStudents(c.id);
           return c.modules.map((m,i)=>{
@@ -598,7 +594,6 @@ function renderDashboard(){
     </div>
   </div>
 
-  <!-- AT-RISK WIDGET -->
   <div class="card" style="border-color:rgba(220,38,38,0.2);">
     <div class="card-hdr" style="background:var(--danger-light);">
       <div class="card-title" style="color:var(--danger);">⚠️ Students Requiring Attention</div>
@@ -610,90 +605,12 @@ function renderDashboard(){
           <div>
             <div style="font-size:13px;font-weight:500;color:var(--text);">${s.name}</div>
             <div style="font-size:11px;color:var(--danger);margin-top:2px;">
-              ${s.lastSeen>=5?'Inactive for '+s.lastSeen+' days':''} 
-              ${s.pct<20&&s.lastSeen<5?'Progress critically low ('+s.pct+'%)':''}
+              ${s.lastSeen>=5?'Inactive for '+s.lastSeen+' days':'Progress critically low ('+s.pct+'%)'}
             </div>
           </div>
-          <button class="btn btn-danger btn-xs" onclick="window.open('https://wa.me/?text='+encodeURIComponent('Dear ${s.name}, please log in to continue your studies.'),'_blank')">WhatsApp</button>
+          <button class="btn btn-danger btn-xs" onclick="window.open('https://wa.me/?text='+encodeURIComponent('Dear ${s.name}, please log in to complete your modules.'),'_blank')">WhatsApp</button>
         </div>`).join('')}
     </div>
-  </div>`;
-}
-  mc().innerHTML=`
-  <div class="deadline-banner">
-    <div class="deadline-banner-icon">📅</div>
-    <div class="deadline-banner-body">
-      <div class="deadline-banner-title">Cohort 1 Module Deadline</div>
-      <div class="deadline-banner-sub">All students must complete their modules by <strong style="color:white;">13 July 2026</strong> to sit the physical examination on 19 July 2026.</div>
-    </div>
-    <div class="deadline-countdown">
-      <div class="deadline-days">${dl}</div>
-      <div class="deadline-days-label">days left</div>
-    </div>
-  </div>
-
-  <div class="stat-grid">
-    <div class="stat s-blue"><div class="stat-num">${total}</div><div class="stat-label">Total Students</div><div class="stat-sub">Across 3 courses</div></div>
-    <div class="stat s-green"><div class="stat-num">${ready}</div><div class="stat-label">Exam Ready</div><div class="stat-sub">All modules done</div></div>
-    <div class="stat s-amber"><div class="stat-num">${total-ready}</div><div class="stat-label">Still In Progress</div><div class="stat-sub">${dl} days remaining</div></div>
-    <div class="stat s-red"><div class="stat-num">${atRisk}</div><div class="stat-label">At Risk</div><div class="stat-sub">No activity 5+ days</div></div>
-    <div class="stat s-purple"><div class="stat-num">3</div><div class="stat-label">Active Courses</div><div class="stat-sub">${total} students total</div></div>
-  </div>
-
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
-    <div class="card">
-      <div class="card-hdr"><div class="card-title">Enrolment by Course</div></div>
-      <div class="card-body">
-        ${COURSES.map(c=>`
-          <div style="margin-bottom:12px;">
-            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
-              <span style="color:var(--text);">${c.title}</span>
-              <span style="font-weight:600;color:var(--blue);">${c.students}</span>
-            </div>
-            ${bar(Math.round(c.students/50*100),c.color)}
-          </div>`).join('')}
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-hdr"><div class="card-title">Exam Eligibility Progress</div></div>
-      <div class="card-body">
-        ${COURSES.map(c=>{
-          var sts=courseStudents(c.id);
-          var rd=sts.filter(examReady).length;
-          var pct=Math.round(rd/sts.length*100);
-          return `<div style="margin-bottom:12px;">
-            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
-              <span>${c.label}</span>
-              <span style="font-weight:600;color:var(--ok);">${rd}/${sts.length} ready</span>
-            </div>
-            ${bar(pct,'var(--ok)')}
-          </div>`;
-        }).join('')}
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-hdr">
-      <div class="card-title">Recent Activity</div>
-      <button class="btn btn-outline btn-sm" onclick="goTab('progress')">View all →</button>
-    </div>
-    <table class="tbl">
-      <thead><tr><th>Student</th><th>Course</th><th>Action</th><th>Last Seen</th></tr></thead>
-      <tbody>
-        ${STUDENTS.slice(0,8).map(s=>{
-          var c=courseById(s.course);
-          var done=s.m.filter(v=>v===2).length;
-          var total=s.m.length;
-          return `<tr>
-            <td><div style="font-weight:500;">${s.name}</div><div style="font-size:11px;color:var(--muted);">${s.email}</div></td>
-            <td><span class="pill pill-blue" style="font-size:10px;">${c.label}</span></td>
-            <td>${s.pct===100?'<span class="pill pill-green">Exam Ready</span>':s.pct>50?'<span class="pill pill-amber">Good Progress</span>':'<span class="pill pill-red">Needs Attention</span>'}</td>
-            <td style="font-size:12px;color:${s.lastSeen>=5?'var(--danger)':'var(--muted)'};">${lastSeenLabel(s.lastSeen)}</td>
-          </tr>`;
-        }).join('')}
-      </tbody>
-    </table>
   </div>`;
 }
 
